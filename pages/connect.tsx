@@ -49,7 +49,7 @@ export default function ConnectPage(props: {}) {
 				})
 				.then(() => {
 					localStorage.setItem(LOCAL_STORAGE_SECRET_KEY, secret)
-					router.push("/messages")
+					router.push("/")
 				})
 				.catch(() => alert("Could not verify user! Did you post the tweet?"))
 		}

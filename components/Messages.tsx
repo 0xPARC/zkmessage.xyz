@@ -35,6 +35,7 @@ async function clickDeny(secret: string, hash: string, msg: string, msgAttestati
 async function clickSendMessage(secret: string, hashes: string[], messageBody: string) {
 	if (!messageBody || messageBody === "") {
 		alert("You can't send a blank message!")
+		return
 	}
 	console.log(`Generating proof for message ${messageBody} with secret ${secret}`)
 	const { proof, publicSignals, verified } = await prove(secret, hashes,  messageBody);

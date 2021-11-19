@@ -26,7 +26,7 @@ export function Header() {
 						className="cursor-pointer hover:underline mt-16"
 						onClick={() => {
 							localStorage.clear()
-							history.pushState( "/")
+							document.location = "/"
 						}}
 					>
 						Logout
