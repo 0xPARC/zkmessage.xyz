@@ -68,19 +68,19 @@ export default function Messages({ secret, messages, selectedUsers }: {secret: s
 					<input
 						disabled={!secret}
 						type="text"
-						className="rounded-xl px-4 py-3 mr-3 flex-1 !font-monospace outline-none"
-						placeholder="Type your message here"
+						className={`rounded-xl px-4 py-3 mr-3 flex-1 !font-monospace outline-none bg-white ${secret ? "" : "placeholder-light"}`}
+						placeholder={secret ? "Type your message here" : "Login to send a message"}
 						value={newMessage}
 						onChange={(e) => setNewMessage(e.target.value)}
 					/>
 					<input
 						disabled={!secret}
-						className={`cursor-pointer text-white rounded-xl px-4 py-2 ${
-							secret ? "bg-pink hover:bg-midpink" : "bg-gray-200"
+						className={`text-white rounded-xl px-4 py-2 ${
+							secret ? "cursor-pointer bg-pink hover:bg-midpink" : "bg-gray-200"
 						}`}
 						type="submit"
 						value="Send"
-						onClick={(e) => clickSendMessage(secret, selectedUsers.map((user) => user.hash), newMessage)}
+						onClick={(e) => clickSendMessage(secret, (selectedUsers || []).map((user) => user.hash), newMessage)}
 					/>
 				</form>
 			</div>

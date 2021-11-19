@@ -29,12 +29,9 @@ export default function ConnectPage(props: {}) {
 
 	const router = useRouter()
 
-	const [openedTwitterIntent, setOpenedTwitterIntent] = useState(false)
-
 	const openTwitterIntent = useCallback((intent: string) => {
 		if (intent !== null) {
 			window.open(intent)
-			setOpenedTwitterIntent(true)
 		}
 	}, [])
 
@@ -75,26 +72,13 @@ export default function ConnectPage(props: {}) {
 						Post to Twitter
 					</button>
 				)}
-				{openedTwitterIntent ? (
-					<button
-						className="block w-full cursor-pointer bg-pink hover:bg-midpink text-white rounded-xl px-4 py-2 mt-6"
-						type="button"
-						onClick={() => createUser()}
-					>
-						Check
-					</button>
-				) : (
-					<button className="block w-full cursor-not-allowed bg-gray-300 text-gray-800 rounded-xl px-4 py-2 mt-6">
-						Check
-					</button>
-				)}
-
-				<input
-					className="block w-full cursor-pointer bg-gray-300 text-gray-800 rounded-xl px-4 py-2 mt-6"
+				<button
+					className="block w-full cursor-pointer bg-pink hover:bg-midpink text-white rounded-xl px-4 py-2 mt-3"
 					type="button"
-					value="Back"
-					onClick={() => router.push("/backup")}
-				/>
+					onClick={() => createUser()}
+				>
+					Check
+				</button>
 			</div>
 		</div>
 	)
