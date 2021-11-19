@@ -5,24 +5,37 @@ export interface Proof {
 	proof: Object
 }
 
-export async function prove(input: {
-	secret: string // the secret is just plain text
-	hash1: string // the hashes are all hex, no leading 0x
-	hash2: string
-	hash3: string
-	msg: string // the message is plain text
-}): Promise<Proof> {
-	const secretHex = Buffer.from(input.secret).toString("hex")
-	const secret = secretHex ? BigInt("0x" + secretHex).toString() : "0"
-	const hash1 = BigInt("0x" + input.hash1).toString()
-	const hash2 = BigInt("0x" + input.hash2).toString()
-	const hash3 = BigInt("0x" + input.hash3).toString()
-	const messageHex = Buffer.from(input.msg).toString("hex")
-	const msg = messageHex ? BigInt("0x" + messageHex).toString() : "0"
+const plaintextToHex = (str: string) => {
+	const strHex = Buffer.from(str).toString("hex")
+	return BigInt("0x" + strHex).toString()
+}
 
-	console.log("inputs", { secret, hash1, hash2, hash3, msg })
+const hexStrToHex = (str: string) => {
+	return BigInt("0x" + str).toString()
+}
+
+const HASH_ARR_SIZE = 40;
+
+export async function prove(
+	secret: string, // the secret is just plain text
+	hashes: string[], // the list of hashes
+	msg: string // the message is plain text
+): Promise<Proof> {
+	const secretHex = plaintextToHex(secret);
+	const msgHex = plaintextToHex(msg)
+	if (hashes.length < 40) {
+		hashes = hashes.concat(Array(HASH_ARR_SIZE-hashes.length).fill("0"))
+	} else if (hashes.length > HASH_ARR_SIZE) {
+		alert(`This app is only configured with max ${HASH_ARR_SIZE} users, truncating array!`)
+		hashes = hashes.slice(0,HASH_ARR_SIZE);
+	}
+
+	const hashesHex = hashes.map((hash) => hexStrToHex(hash));
+
+	console.log(secretHex, msgHex, hashesHex)
+
 	const { proof, publicSignals } = await snarkjs.groth16.fullProve(
-		{ secret, hash1, hash2, hash3, msg },
+		{ msg: msgHex, secret: secretHex, hashes: hashesHex },
 		"/hash.wasm",
 		"/hash.zkey"
 	)
@@ -33,24 +46,14 @@ export async function prove(input: {
 }
 
 export async function verify(
-	vkey: any,
+	vkeyPath: any,
 	{ proof, publicSignals }: Proof
 ): Promise<boolean> {
-	const res = await snarkjs.groth16.verify(vkey, publicSignals, proof)
-	console.log("got result", res)
+	const loadedVKey = await fetch(vkeyPath).then(res => res.json());
+	const res = await snarkjs.groth16.verify(loadedVKey, publicSignals, proof);
 	return res
 }
 
-
-const stringToHex = (str: string) => {
-	const secretHex = Buffer.from(str).toString("hex")
-	const secret = secretHex ? BigInt("0x" + secretHex).toString() : "0"
-	return secret
-}
-
-const hexStrToHex = (str: string) => {
-	return BigInt("0x" + str).toString()
-}
 
 export async function revealOrDeny(
 	reveal: boolean,
@@ -71,7 +74,7 @@ export async function revealOrDeny(
 
 	const vkey = await fetch(`/${revealOrDenyStr}.vkey.json`).then((res) => res.json())
 	const res = await snarkjs.groth16.verify(vkey, publicSignals, proof)
-	console.log("Got verification result", res)
+	console.log(`Got verification result for ${revealOrDenyStr}`, res)
 
 	return res;
 }
