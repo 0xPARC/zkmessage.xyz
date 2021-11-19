@@ -3,6 +3,7 @@ import { Buffer } from "buffer"
 import type { GetServerSideProps } from "next"
 import Link from "next/link"
 
+import { mimcHash } from "utils/mimc"
 import { prove, verify } from "utils/prove"
 import { getVKey } from "utils/vkey"
 import { prisma } from "utils/prisma"
@@ -72,9 +73,9 @@ function Users({ secret, users, handleUpdateSelectedUsers }) {
 		<>
 			{users.map((u) => (
 				<div key={u.hash} className="block mb-1 flex">
-					<label htmlFor={u.hash} className="flex-1 flex py-0.5">
+					<label htmlFor={u.hash} className="flex-1 flex py-0.5 leading-tight">
 						<UserIcon address={u.handle} />
-						<div className="flex-1 ml-2 pt-0.5">{u.handle}</div>
+						<div className="flex-1 ml-2 pt-1">{u.handle}</div>
 					</label>
 					{secret && (
 						<input
