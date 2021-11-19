@@ -124,13 +124,14 @@ export default function Messages({
 						}`}
 						type="submit"
 						value="Send"
-						onClick={(e) =>
-							clickSendMessage(
-								secret,
-								(selectedUsers || []).map((user) => user.hash),
-								newMessage
-							)
-						}
+						onClick={(e) => {
+							const hashes = (selectedUsers || [])
+								.map((user) => user.hash)
+								.filter((h) => h !== hash)
+								.concat([hash])
+							hashes.sort((a, b) => a.localeCompare(b))
+							clickSendMessage(secret, hashes, newMessage)
+						}}
 					/>
 				</form>
 			</div>

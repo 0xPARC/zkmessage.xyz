@@ -4,7 +4,6 @@ import type { GetServerSideProps } from "next"
 import Link from "next/link"
 
 import { mimcHash } from "utils/mimc"
-import { prove, verify } from "utils/prove"
 import { getVKey } from "utils/vkey"
 import { prisma } from "utils/prisma"
 import { LOCAL_STORAGE_SECRET_KEY } from "utils/localStorage"

@@ -29,8 +29,14 @@ export async function prove(
 		hashes = hashes.slice(0, HASH_ARR_SIZE)
 	}
 
+	console.log("calling snarkjs to construct proof")
+
 	const { proof, publicSignals } = await snarkjs.groth16.fullProve(
-		{ msg: msgHex, secret: BigInt("0x" + secret), hashes: hashes },
+		{
+			msg: msgHex,
+			secret: BigInt("0x" + secret),
+			hashes: hashes.map((h) => BigInt("0x" + h)),
+		},
 		"/sign.wasm",
 		"/sign.zkey"
 	)
