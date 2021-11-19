@@ -63,11 +63,26 @@ function Users({ secret, users, handleUpdateSelectedUsers }) {
 						className="flex-1 flex py-0.5 leading-tight"
 					>
 						<UserIcon address={u.twitterHandle} />
-						<a href={`https://twitter.com/${u.twitterHandle}`} target="_blank">
-							<div className="flex-1 ml-2 pt-1 cursor-pointer hover:underline">
-								{u.twitterHandle}
-							</div>
-						</a>
+						<div className="flex-1 ml-3 pt-1 ">
+							<a
+								href={`https://twitter.com/${u.twitterHandle}`}
+								target="_blank"
+							>
+								<div className="cursor-pointer hover:underline inline-block">
+									{u.twitterHandle}
+								</div>
+							</a>
+							<a
+								href={`https://twitter.com/${u.twitterHandle}/status/${u.verificationTweetId}`}
+								target="_blank"
+							>
+								<img
+									src="/key.svg"
+									width="16"
+									className="inline-block ml-1 -mt-0.5 opacity-20 hover:opacity-70"
+								/>
+							</a>
+						</div>
 					</label>
 					{secret && (
 						<input
