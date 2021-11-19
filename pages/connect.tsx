@@ -1,19 +1,25 @@
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { Header } from "components/Header"
 import { getTextFromPublicKey } from "utils/verification"
-import { LOCAL_STORAGE_SECRET_KEY_UNVERIFIED } from "utils/localStorage"
+import {
+	LOCAL_STORAGE_SECRET_KEY,
+	LOCAL_STORAGE_SECRET_KEY_UNVERIFIED,
+} from "utils/localStorage"
 import { mimcHash } from "utils/mimc"
 import { useRouter } from "next/router"
 
 import api from "next-rest/client"
 
 export default function ConnectPage(props: {}) {
+	const secretKey = useRef<string | null>(null)
 	const publicKey = useRef<string | null>(null)
 	const [intent, setIntent] = useState<string | null>(null)
 	useEffect(() => {
-		const secret = localStorage.getItem(LOCAL_STORAGE_SECRET_KEY_UNVERIFIED)
-		if (secret !== null) {
-			const n = BigInt("0x" + secret)
+		secretKey.current = localStorage.getItem(
+			LOCAL_STORAGE_SECRET_KEY_UNVERIFIED
+		)
+		if (secretKey.current !== null) {
+			const n = BigInt("0x" + secretKey.current)
 			const h = mimcHash(n)
 			publicKey.current = h.toString(16)
 			const text = getTextFromPublicKey(publicKey.current)
@@ -33,12 +39,19 @@ export default function ConnectPage(props: {}) {
 	}, [])
 
 	const createUser = useCallback(() => {
-		if (publicKey.current !== null) {
-			api.post("/api/users", {
-				params: {},
-				headers: { "content-type": "application/json" },
-				body: { publicKey: publicKey.current },
-			})
+		if (secretKey.current !== null && publicKey.current !== null) {
+			const secret = secretKey.current
+			api
+				.post("/api/users", {
+					params: {},
+					headers: { "content-type": "application/json" },
+					body: { publicKey: publicKey.current },
+				})
+				.then(() => {
+					localStorage.setItem(LOCAL_STORAGE_SECRET_KEY, secret)
+					router.push("/messages")
+				})
+				.catch(() => alert("Could not verify user! Did you post the tweet?"))
 		}
 	}, [])
 
