@@ -3,14 +3,14 @@ import { Buffer } from "buffer"
 import type { GetServerSideProps } from "next"
 import Link from "next/link"
 
-import { prove } from "utils/prove"
+import { prove, verify } from "utils/prove"
+import { getVKey } from "utils/vkey"
 import { prisma } from "utils/prisma"
 import { LOCAL_STORAGE_SECRET_KEY } from "utils/localStorage"
 import { useRouter } from "next/router"
 import { Header } from "components/Header"
 
 import Messages from "components/Messages"
-import NewGroup from "components/NewGroup"
 import UserIcon from "components/UserIcon"
 
 interface IndexPageProps {
@@ -110,8 +110,25 @@ export default function Index(props: IndexPageProps) {
 	const handleUpdateSelectedUsers = (users) => {
 		setSelectedUsers(users)
 	}
-	const handleSend = (msg) => {
-		console.log(msg)
+	const handleSend = async (msg) => {
+		const hex = Buffer.from(secret).toString("hex")
+		const i = hex ? BigInt("0x" + hex) : 0n
+		const myHash = mimcHash(i).toString(16)
+		const { proof, publicSignals } = await prove({
+			secret,
+			hash1,
+			hash2,
+			hash3,
+			msg,
+		})
+		console.log("proof:", proof)
+		console.log("publicSignals:", publicSignals)
+
+		const vkey = await $.get("/public/hash.vkey.json")
+		console.log("vkey:", vkey)
+
+		const verification = await verify(vkey, { proof, publicSignals })
+		console.log("verification:", verification)
 	}
 
 	return (
@@ -131,7 +148,6 @@ export default function Index(props: IndexPageProps) {
 						users={users}
 						handleUpdateSelectedUsers={handleUpdateSelectedUsers}
 					/>
-					<NewGroup />
 				</div>
 			</div>
 		</div>
