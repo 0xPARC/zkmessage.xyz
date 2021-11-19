@@ -8,8 +8,7 @@ import api from "next-rest/client"
 async function clickReveal(
 	secret: string,
 	hash: string,
-	msg: string,
-	msgAttestation: string
+	message: Message
 ) {
 	// If reveal is clicked, then verify that user has indeed revealed.
 	// If the proof fails, then surface an alert that reveal failed.
@@ -20,8 +19,8 @@ async function clickReveal(
 		true,
 		secret,
 		hash,
-		msg,
-		msgAttestation
+		message.message,
+		message.messageAttestation
 	)
 	if (isValidProof) {
 		// Send the proof to the DB & store it. Update the lists of users on the deny side.
@@ -35,16 +34,15 @@ async function clickReveal(
 async function clickDeny(
 	secret: string,
 	hash: string,
-	msg: string,
-	msgAttestation: string
+	message: Message
 ) {
 	console.log(`Attempting to generate proof & verify deny.`)
 	const isValidProof = await revealOrDeny(
 		false,
 		secret,
 		hash,
-		msg,
-		msgAttestation
+		message.message,
+		message.messageAttestation
 	)
 	if (isValidProof) {
 		// Send the proof to the DB & store it. Update the lists of users on the deny side.
@@ -99,6 +97,7 @@ export default function Messages({
 	messages,
 	selectedUsers,
 }: {
+	hash: string,
 	secret: string
 	messages: Message[]
 	selectedUsers: User[]
@@ -171,9 +170,8 @@ export default function Messages({
 												onClick={(e) =>
 													clickReveal(
 														secret,
-														userHash,
-														message.message,
-														msgAttestation
+														hash,
+														message
 													)
 												}
 											/>
@@ -190,9 +188,8 @@ export default function Messages({
 												onClick={(e) =>
 													clickDeny(
 														secret,
-														userHash,
-														message.message,
-														msgAttestation
+														hash,
+														message
 													)
 												}
 											/>
