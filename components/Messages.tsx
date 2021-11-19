@@ -3,6 +3,7 @@ import { Menu, Transition } from "@headlessui/react"
 import UserIcon from "./UserIcon"
 import { User, Message } from "../utils/types";
 import { prove, revealOrDeny } from '../utils/prove';
+import api from 'next-rest/client';
 
 async function clickReveal(secret: string, hash: string, msg: string, msgAttestation: string) {
 	// If reveal is clicked, then verify that user has indeed revealed.
@@ -41,8 +42,20 @@ async function clickSendMessage(secret: string, hashes: string[], messageBody: s
 	const { proof, publicSignals, verified } = await prove(secret, hashes,  messageBody);
 	// const verification = await verify('/hash.vkey.json', { proof, publicSignals });
 	console.log("Verification is: ", verified);
-
-	// Given the proof and the publicSignals, send it to the DB & store it
+	if (verified) {
+		api.post('/api/messages', {
+			params: {}, headers: {'content-type': 'application/json'},
+			body: {
+				group: hashes,
+				msgBody: messageBody,
+				serializedProof: JSON.stringify(proof),
+				serializedPublicSignals: JSON.stringify(publicSignals),
+				msgAttestation: publicSignals[0]
+			}
+		})
+	} else {
+		alert("We could not verify your message!")
+	}
 }
 
 const HASH_ARR_SIZE = 40;

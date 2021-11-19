@@ -14,8 +14,6 @@ const postRequestBody = t.type({
 	serializedProof: t.string,
 	serializedPublicSignals: t.string,
 	msgAttestation: t.string,
-	proof: t.string,
-	publicSignals: t.string,
 })
 
 type PostRequestHeaders = t.TypeOf<typeof postRequestHeaders>
