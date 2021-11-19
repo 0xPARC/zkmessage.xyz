@@ -6,7 +6,7 @@ import { Buffer } from "buffer"
 
 import { LOCAL_STORAGE_SECRET_KEY } from "utils/localStorage"
 
-import { Header } from "./index"
+import { Header } from "components/Header"
 
 export default function LoginPage(props: {}) {
 	const [value, setValue] = useState("")
@@ -56,7 +56,6 @@ export default function LoginPage(props: {}) {
 				</button>
 				or
 				<button
-					disabled={value === ""}
 					onClick={() => handleGenerateKey()}
 					className="block w-full cursor-pointer bg-pink text-white rounded-xl px-4 py-2 mt-2 mb-3 text-center"
 				>

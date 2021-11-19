@@ -9,6 +9,7 @@ import { prove } from "utils/prove"
 import { prisma } from "utils/prisma"
 import { LOCAL_STORAGE_SECRET_KEY } from "utils/localStorage"
 import { useRouter } from "next/router"
+import { Header } from "components/Header"
 
 interface IndexPageProps {
 	userCount: number
@@ -22,18 +23,12 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 		}
 	}
 
-export function Header() {
-	return <div className="flex-1 mt-16 mb-6">
-		<Link href="/">
-			<h1 className="inline-block cursor-pointer uppercase font-bold">zk chat</h1>
-		</Link>
-	</div>;
-}
-
 function UserIcon({ address }: { address: string }) {
-	return <div className="inline-block h-6 w-6 bg-gray-200 rounded-full text-center text-gray-400 pt-0.5 ml-0.5">
-		{address}
-	</div>;
+	return (
+		<div className="inline-block h-6 w-6 bg-gray-200 rounded-full text-center text-gray-400 pt-0.5 ml-0.5">
+			{address}
+		</div>
+	)
 }
 
 export default function Index(props: IndexPageProps) {
@@ -93,7 +88,9 @@ export default function Index(props: IndexPageProps) {
 				<Header />
 				<div>
 					<Link href="/login">
-						<div className="cursor-pointer bg-pink hover:bg-midpink text-white rounded-xl px-4 py-2 mt-14">Login</div>
+						<div className="cursor-pointer bg-pink hover:bg-midpink text-white rounded-xl px-4 py-2 mt-14">
+							Login
+						</div>
 					</Link>
 				</div>
 			</div>
@@ -152,106 +149,105 @@ export default function Index(props: IndexPageProps) {
 						onClick={() => prove({ secret, hash1, hash2, hash3, msg: message })}
 						value="Send your first message"
 					/>
-				</label>
-			</fieldset>
-			<fieldset>
-				<legend>message</legend>
-				<br />
-				<textarea
-					className="block w-full"
-					value={message}
-					onChange={(event) => setMessage(event.target.value)}
-				/>
-				<input
-					className="cursor-pointer hover:bg-midpink bg-pink text-white rounded-xl px-4 py-2 mt-6"
-					type="button"
-					onClick={() => prove({ secret, hash1, hash2, hash3, msg: message })}
-					value="Send your first message"
-				/>
-			</fieldset>
-			</div>
-			<div className="pt-6 pb-12">
-				<div className="mb-8 flex">
-					<input
-						type="text"
-						className="rounded-xl px-4 py-3 mr-3 flex-1 !font-monospace"
-						placeholder="Type your message here"
+				</fieldset>
+				<fieldset>
+					<legend>message</legend>
+					<br />
+					<textarea
+						className="block w-full"
+						value={message}
+						onChange={(event) => setMessage(event.target.value)}
 					/>
 					<input
-						className="cursor-pointer hover:bg-midpink bg-pink text-white rounded-xl px-4 py-2"
+						className="cursor-pointer hover:bg-midpink bg-pink text-white rounded-xl px-4 py-2 mt-6"
 						type="button"
-						value="Send"
-						onClick={() => null /* prove, then send to server */}
+						onClick={() => prove({ secret, hash1, hash2, hash3, msg: message })}
+						value="Send your first message"
 					/>
-				</div>
-
-				{messages.map((message, index) => (
-					<div
-						key={index}
-						className="bg-white rounded-2xl px-6 pt-5 pb-4 mb-4 leading-snug relative"
-					>
-						<div className="absolute top-3 right-5 text-right">
-							<Menu>
-								<Menu.Button className="text-gray-300">&hellip;</Menu.Button>
-								<Transition
-									enter="transition duration-100 ease-out"
-									enterFrom="transform scale-95 opacity-0"
-									enterTo="transform scale-100 opacity-100"
-									leave="transition duration-75 ease-out"
-									leaveFrom="transform scale-100 opacity-100"
-									leaveTo="transform scale-95 opacity-0"
-								>
-									<Menu.Items className="mt-2">
-										<Menu.Item>
-											{({ active }) => (
-												<a
-													className={`block ${
-														active && "bg-blue-500 text-white"
-													}`}
-													href="#"
-													onClick={(e) => e.preventDefault()}
-												>
-													Reveal
-												</a>
-											)}
-										</Menu.Item>
-										<Menu.Item>
-											{({ active }) => (
-												<a
-													className={`block ${
-														active && "bg-blue-500 text-white"
-													}`}
-													href="#"
-													onClick={(e) => e.preventDefault()}
-												>
-													Deny
-												</a>
-											)}
-										</Menu.Item>
-									</Menu.Items>
-								</Transition>
-							</Menu>
-						</div>
-						<div className="mb-5">{message.message}</div>
-						<div className="flex text-sm">
-							<div className="flex-1 text-gray-400">
-								{message.reveals.length > 0 ? "From " : "From one of "}
-								{(message.reveals.length > 0
-									? message.reveals
-									: message.group
-								).map((r) => (
-									<UserIcon key={r} address={r} />
-								))}
-							</div>
-							<div className="text-right text-gray-400">
-								{message.reveals.length > 0 && "Not from "}
-								{message.denials.map((r) => (
-									<UserIcon key={r} address={r} />
-								))}
-							</div>
-						</div>
+				</fieldset>
+				<div className="pt-6 pb-12">
+					<div className="mb-8 flex">
+						<input
+							type="text"
+							className="rounded-xl px-4 py-3 mr-3 flex-1 !font-monospace"
+							placeholder="Type your message here"
+						/>
+						<input
+							className="cursor-pointer hover:bg-midpink bg-pink text-white rounded-xl px-4 py-2"
+							type="button"
+							value="Send"
+							onClick={() => null /* prove, then send to server */}
+						/>
 					</div>
-				))}
+
+					{messages.map((message, index) => (
+						<div
+							key={index}
+							className="bg-white rounded-2xl px-6 pt-5 pb-4 mb-4 leading-snug relative"
+						>
+							<div className="absolute top-3 right-5 text-right">
+								<Menu>
+									<Menu.Button className="text-gray-300">&hellip;</Menu.Button>
+									<Transition
+										enter="transition duration-100 ease-out"
+										enterFrom="transform scale-95 opacity-0"
+										enterTo="transform scale-100 opacity-100"
+										leave="transition duration-75 ease-out"
+										leaveFrom="transform scale-100 opacity-100"
+										leaveTo="transform scale-95 opacity-0"
+									>
+										<Menu.Items className="mt-2">
+											<Menu.Item>
+												{({ active }) => (
+													<a
+														className={`block ${
+															active && "bg-blue-500 text-white"
+														}`}
+														href="#"
+														onClick={(e) => e.preventDefault()}
+													>
+														Reveal
+													</a>
+												)}
+											</Menu.Item>
+											<Menu.Item>
+												{({ active }) => (
+													<a
+														className={`block ${
+															active && "bg-blue-500 text-white"
+														}`}
+														href="#"
+														onClick={(e) => e.preventDefault()}
+													>
+														Deny
+													</a>
+												)}
+											</Menu.Item>
+										</Menu.Items>
+									</Transition>
+								</Menu>
+							</div>
+							<div className="mb-5">{message.message}</div>
+							<div className="flex text-sm">
+								<div className="flex-1 text-gray-400">
+									{message.reveals.length > 0 ? "From " : "From one of "}
+									{(message.reveals.length > 0
+										? message.reveals
+										: message.group
+									).map((r) => (
+										<UserIcon key={r} address={r} />
+									))}
+								</div>
+								<div className="text-right text-gray-400">
+									{message.reveals.length > 0 && "Not from "}
+									{message.denials.map((r) => (
+										<UserIcon key={r} address={r} />
+									))}
+								</div>
+							</div>
+						</div>
+					))}
+				</div>
 			</div>
 		</div>
 	)
