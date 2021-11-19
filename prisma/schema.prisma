@@ -15,16 +15,19 @@ model User {
   twitterId           String    @unique
   twitterHandle       String    @unique
   verificationTweetId String    @unique
-  messages            Message[]
+  group               Message[] @relation("group")
+  revealedMessages    Message[] @relation("revealed")
+  deniedMessages      Message[] @relation("denied")
 }
 
 model Message {
-  id      String @id @default(uuid())
-  authors User[]
-  msgBody String
-  serializedProof   String
+  id                      String  @id @default(uuid())
+  group                   User[]  @relation(name: "group")
+  msgBody                 String
+  serializedProof         String
   serializedPublicSignals String
-  msgAttestation String
-  revealed User?
-  denials  User[]
+  msgAttestation          String
+  revealedPublicKey       String?
+  revealed                User?   @relation(name: "revealed", fields: [revealedPublicKey], references: [publicKey])
+  denials                 User[]  @relation(name: "denied")
 }
