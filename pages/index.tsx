@@ -17,6 +17,46 @@ interface IndexPageProps {
 	userCount: number
 }
 
+const users = [
+	{
+		handle: "zero",
+		hash: "2b68833d258d2439328267662b1b2e0a3415ee3d70125bd5a28bf8d9020b8144",
+	},
+	{
+		handle: "one",
+		hash: "155c1ffe0caa4c8fa68bb34c4a7c8d6246bc87489993709231a3557fda128c4b",
+	},
+	{
+		handle: "two",
+		hash: "2edf7af3393ac06294c2b9e5bba4362048a48ef55cfaa64f6f4489d4ecc37cb5",
+	},
+]
+
+const messages = [
+	{
+		message: "Hello world!",
+		proof: "",
+		group: ["0", "1", "2"],
+		reveals: [],
+		denials: [],
+	},
+	{
+		message:
+			"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempo",
+		proof: "",
+		group: ["0", "1", "2"],
+		reveals: ["0"],
+		denials: ["1", "2"],
+	},
+	{
+		message: "Random message",
+		proof: "",
+		group: ["0", "1", "2"],
+		reveals: [],
+		denials: [],
+	},
+]
+
 export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 	async (context) => {
 		const userCount = await prisma.user.count()
@@ -25,29 +65,32 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 		}
 	}
 
-function Users({ users }) {
+function Users({ secret, users, handleUpdateSelectedUsers }) {
 	const [selectedUsers, setSelectedUsers] = useState([])
 
 	return (
 		<>
 			{users.map((u) => (
-				<div className="block mb-1 flex">
-					<label for={u.hash} className="flex-1 flex py-0.5">
+				<div key={u.hash} className="block mb-1 flex">
+					<label htmlFor={u.hash} className="flex-1 flex py-0.5">
 						<UserIcon address={u.handle} />
 						<div className="flex-1 ml-2 pt-0.5">{u.handle}</div>
 					</label>
-					<input
-						className="mt-2.5"
-						type="checkbox"
-						id={u.hash}
-						onChange={() => {
-							if (selectedUsers.indexOf(u.hash) === -1) {
-								setSelectedUsers(selectedUsers.concat(u.hash))
-							} else {
-								setSelectedUsers(selectedUsers.filter((h) => h !== u.hash))
-							}
-						}}
-					/>
+					{secret && (
+						<input
+							className="mt-2.5"
+							type="checkbox"
+							id={u.hash}
+							onChange={() => {
+								if (selectedUsers.indexOf(u.hash) === -1) {
+									setSelectedUsers(selectedUsers.concat(u.hash))
+								} else {
+									setSelectedUsers(selectedUsers.filter((h) => h !== u.hash))
+								}
+								handleUpdateSelectedUsers(selectedUsers)
+							}}
+						/>
+					)}
 				</div>
 			))}
 		</>
@@ -55,67 +98,39 @@ function Users({ users }) {
 }
 
 export default function Index(props: IndexPageProps) {
+	const router = useRouter()
+	const [secret, setSecret] = useState()
+	const [selectedUsers, setSelectedUsers] = useState()
+
 	console.log("we have", props.userCount, "users")
 
-	const router = useRouter()
-
-	// useEffect(() => {
-	// 	const secret = localStorage.getItem(LOCAL_STORAGE_SECRET_KEY)
-	// 	if (secret === null) {
-	// 		// user doesn't have a secret key in localstorage
-	// 		router.push("/login")
-	// 	}
-	// }, [])
-
-	const users = [
-		{
-			handle: "zero",
-			hash: "2b68833d258d2439328267662b1b2e0a3415ee3d70125bd5a28bf8d9020b8144",
-		},
-		{
-			handle: "one",
-			hash: "155c1ffe0caa4c8fa68bb34c4a7c8d6246bc87489993709231a3557fda128c4b",
-		},
-		{
-			handle: "two",
-			hash: "2edf7af3393ac06294c2b9e5bba4362048a48ef55cfaa64f6f4489d4ecc37cb5",
-		},
-	]
-
-	const messages = [
-		{
-			message: "Hello world!",
-			proof: "",
-			group: ["0", "1", "2"],
-			reveals: [],
-			denials: [],
-		},
-		{
-			message:
-				"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempo",
-			proof: "",
-			group: ["0", "1", "2"],
-			reveals: ["0"],
-			denials: ["1", "2"],
-		},
-		{
-			message: "Random message",
-			proof: "",
-			group: ["0", "1", "2"],
-			reveals: [],
-			denials: [],
-		},
-	]
+	useEffect(() => {
+		setSecret(localStorage.getItem(LOCAL_STORAGE_SECRET_KEY))
+	}, [])
+	const handleUpdateSelectedUsers = (users) => {
+		setSelectedUsers(users)
+	}
+	const handleSend = (msg) => {
+		console.log(msg)
+	}
 
 	return (
 		<div className="max-w-4xl m-auto font-mono">
 			<Header />
 			<div className="grid grid-cols-4 gap-6 pt-2">
 				<div className="col-span-3">
-					<Messages messages={messages} />
+					<Messages
+						secret={secret}
+						messages={messages}
+						handleSend={handleSend}
+					/>
 				</div>
 				<div className="col-span-1">
-					<Users users={users} />
+					<Users
+						secret={secret}
+						users={users}
+						handleUpdateSelectedUsers={handleUpdateSelectedUsers}
+					/>
 					<NewGroup />
 				</div>
 			</div>

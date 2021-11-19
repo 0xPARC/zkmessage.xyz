@@ -46,10 +46,10 @@ export default function LoginPage(props: {}) {
 				>
 					Login
 				</button>
-				<div className="mt-8 mb-4">Or sign up to get a new token:</div>
+				<div className="mt-8 mb-4">Or sign up for a new account:</div>
 				<Link href="/backup">
 					<div className="block w-full cursor-pointer bg-pink text-white rounded-xl px-4 py-2 mt-2 mb-1 text-center">
-						Sign up
+						Sign up (generate a new token)
 					</div>
 				</Link>
 			</div>

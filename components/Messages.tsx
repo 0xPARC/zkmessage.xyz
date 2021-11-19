@@ -1,25 +1,38 @@
-import { useMemo, useState } from "react"
+import { useMemo, useState, useRef } from "react"
 import { mimcHash } from "utils/mimc"
 import { Menu, Transition } from "@headlessui/react"
 import UserIcon from "./UserIcon"
 
-export default function Messages({ messages }) {
+export default function Messages({ secret, messages, handleSend }) {
+	const messageRef = useRef()
+
 	return (
 		<>
 			<div className="pt-1 pb-6">
-				<div className="flex">
+				<form
+					className="flex"
+					onSubmit={(e) => {
+						e.preventDefault()
+						handleSend(messageRef.current.value)
+						messageRef.current.value = ""
+					}}
+				>
 					<input
+						disabled={!secret}
 						type="text"
-						className="rounded-xl px-4 py-3 mr-3 flex-1 !font-monospace outline-none"
-						placeholder="Type your message here"
+						ref={messageRef}
+						className="rounded-xl px-4 py-3 mr-3 flex-1 !font-monospace outline-none bg-white placeholder-light"
+						placeholder={secret ? "Type your message here" : "Log in to post"}
 					/>
 					<input
-						className="cursor-pointer hover:bg-midpink bg-pink text-white rounded-xl px-4 py-2"
-						type="button"
+						disabled={!secret}
+						className={`cursor-pointer text-white rounded-xl px-4 py-2 ${
+							secret ? "bg-pink hover:bg-midpink" : "bg-gray-200"
+						}`}
+						type="submit"
 						value="Send"
-						onClick={() => null /* prove, then send to server */}
 					/>
-				</div>
+				</form>
 			</div>
 			{messages.map((message, index) => (
 				<div
