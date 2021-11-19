@@ -39,9 +39,9 @@ async function clickSendMessage(secret: string, hashes: string[], messageBody: s
 		alert("You can't send a blank message!")
 	}
 	console.log(`Generating proof for message ${messageBody} with secret ${secret}`)
-	const {proof, publicSignals} = await prove(secret, hashes,  messageBody);
-	const verification = await verify('/hash.vkey.json', { proof, publicSignals });
-	console.log("Verification of send", verification);
+	const {proof, publicSignals, verified } = await prove(secret, hashes,  messageBody);
+	// const verification = await verify('/hash.vkey.json', { proof, publicSignals });
+	console.log("Verification is: ", verified);
 
 	// Given the proof and the publicSignals, send it to the DB & store it
 }
