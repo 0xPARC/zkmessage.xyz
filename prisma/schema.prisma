@@ -12,8 +12,8 @@ datasource db {
 
 model User {
   publicKey           String    @id
-  twitterHandle       String
-  verificationTweetId String
+  twitterHandle       String    @unique
+  verificationTweetId String    @unique
   messages            Message[]
 }
 
