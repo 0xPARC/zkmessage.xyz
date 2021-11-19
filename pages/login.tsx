@@ -23,7 +23,7 @@ export default function LoginPage(props: {}) {
 	const handleLogin = useCallback((value: string) => {
 		const _ = Buffer.from(value, "hex") // just make sure it's a valid hex string
 		localStorage.setItem(LOCAL_STORAGE_SECRET_KEY, value)
-		router.push("/backup")
+		router.push("/")
 	}, [])
 
 	return (
