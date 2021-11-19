@@ -19,3 +19,7 @@ main fieldset textarea {
 input[type="text"] {
 	width: 100%;
 }
+
+.placeholder-light::placeholder {
+	color: #d0d0d0 !important;
+}

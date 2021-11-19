@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react"
 import copy from "copy-text-to-clipboard"
-import { LOCAL_STORAGE_SECRET_KEY } from "utils/localStorage"
-import { mimcHash } from "utils/mimc"
+import {
+	LOCAL_STORAGE_SECRET_KEY,
+	LOCAL_STORAGE_SECRET_KEY_UNVERIFIED,
+} from "utils/localStorage"
 
 import { Header } from "components/Header"
 import Link from "next/link"
@@ -9,17 +11,24 @@ import { useRouter } from "next/router"
 
 export default function BackupPage(props: {}) {
 	const router = useRouter()
-	const [secret, setSecret] = useState<null | string>(null)
+	const [secret, setSecret] = useState<string | null>(null)
 	const [copied, setCopied] = useState<boolean>(false)
 
 	useEffect(() => {
-		const secret = localStorage.getItem(LOCAL_STORAGE_SECRET_KEY)
-		if (secret === null) {
-			router.push("/login")
+		const unverifiedSecret = localStorage.getItem(
+			LOCAL_STORAGE_SECRET_KEY_UNVERIFIED
+		)
+		if (localStorage.getItem(LOCAL_STORAGE_SECRET_KEY)) {
+			router.push("/")
+		} else if (unverifiedSecret === null || unverifiedSecret.length !== 64) {
+			console.log("generating key")
+			const array = new Uint8Array(32)
+			crypto.getRandomValues(array)
+			const secret = Buffer.from(array).toString("hex")
+			localStorage.setItem(LOCAL_STORAGE_SECRET_KEY_UNVERIFIED, secret)
+			setSecret(secret)
 		} else {
-			const n = BigInt("0x" + secret)
-			const h = mimcHash(n)
-			setSecret(h.toString(16))
+			setSecret(unverifiedSecret)
 		}
 	}, [])
 
@@ -27,35 +36,30 @@ export default function BackupPage(props: {}) {
 		<div className="max-w-lg m-auto font-mono">
 			<Header />
 			<div className="border border-gray-300 rounded-xl p-6">
-				<div>This is your ZK CHAT secret token. Save it somewhere safe:</div>
+				<div>
+					This is your ZK CHAT login token. Keep it secret and save it somewhere
+					safe:
+				</div>
 				<textarea
-					className="block w-full outline-none py-5 px-6 my-6 resize-none text-gray-800"
+					className="block w-full outline-none py-5 px-6 my-6 rounded-xl border focus:border-blue-300 resize-none text-gray-800"
 					rows={3}
 					readOnly
-					value={secret}
+					value={secret || ""}
 				/>
 				<input
 					className="block w-full cursor-pointer bg-gray-300 text-gray-800 rounded-xl px-4 py-2 my-4"
 					type="button"
 					value={copied ? "Copied!" : "Copy"}
 					onClick={() => {
-						copy(secret)
+						copy(secret || "")
 						setCopied(true)
 					}}
 				/>
 				<Link href="/connect">
-					<div className="cursor-pointer bg-pink text-white text-center rounded-xl px-4 py-2">
+					<div className="cursor-pointer bg-pink hover:bg-midpink text-white text-center rounded-xl px-4 py-2">
 						Next
 					</div>
 				</Link>
-				<input
-					className="block w-full cursor-pointer bg-gray-300 text-gray-800 rounded-xl px-4 py-2 mt-8"
-					type="button"
-					value="Back"
-					onClick={() => {
-						window.history.go(-1)
-					}}
-				/>
 			</div>
 		</div>
 	)

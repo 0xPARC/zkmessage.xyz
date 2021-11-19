@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useMemo, useState, useRef } from "react"
 import { mimcHash } from "utils/mimc"
 import { Menu, Transition } from "@headlessui/react"
 import UserIcon from "./UserIcon"
@@ -72,9 +72,15 @@ export default function Messages({ secret, messages }: {secret: string, messages
 
 	return (
 		<>
-			<div className="pt-6 pb-6">
-				<div className="flex">
+			<div className="pt-1 pb-6">
+				<form
+					className="flex"
+					onSubmit={(e) => {
+						e.preventDefault()
+					}}
+				>
 					<input
+						disabled={!secret}
 						type="text"
 						className="rounded-xl px-4 py-3 mr-3 flex-1 !font-monospace outline-none"
 						placeholder="Type your message here"
@@ -82,12 +88,15 @@ export default function Messages({ secret, messages }: {secret: string, messages
 						onChange={(e) => setNewMessage(e.target.value)}
 					/>
 					<input
-						className="cursor-pointer hover:bg-midpink bg-pink text-white rounded-xl px-4 py-2"
-						type="button"
+						disabled={!secret}
+						className={`cursor-pointer text-white rounded-xl px-4 py-2 ${
+							secret ? "bg-pink hover:bg-midpink" : "bg-gray-200"
+						}`}
+						type="submit"
 						value="Send"
 						onClick={(e) => clickSendMessage(secret, hashes, newMessage)}
 					/>
-				</div>
+				</form>
 			</div>
 			{messages.map((message, index) => (
 				<div
