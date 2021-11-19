@@ -1,8 +1,9 @@
 import { Buffer } from "buffer"
 
-export interface Proof {
+export interface ProofAndVerification {
 	publicSignals: string[]
-	proof: Object
+	proof: Object,
+	verified: boolean
 }
 
 const plaintextToHex = (str: string) => {
@@ -20,7 +21,7 @@ export async function prove(
 	secret: string, // the secret is just plain text
 	hashes: string[], // the list of hashes
 	msg: string // the message is plain text
-): Promise<Proof> {
+): Promise<ProofAndVerification> {
 	const secretHex = plaintextToHex(secret);
 	const msgHex = plaintextToHex(msg)
 	if (hashes.length < 40) {
@@ -42,17 +43,22 @@ export async function prove(
 
 	console.log("got proof", proof)
 	console.log("got public signals", publicSignals)
-	return { proof, publicSignals }
+
+	const vkeyPath = "/hash.vkey.json"
+	const loadedVKey = await fetch(vkeyPath).then(res => res.json());
+	const verified = await snarkjs.groth16.verify(loadedVKey, publicSignals, proof);
+
+	return { proof, publicSignals, verified }
 }
 
-export async function verify(
-	vkeyPath: any,
-	{ proof, publicSignals }: Proof
-): Promise<boolean> {
-	const loadedVKey = await fetch(vkeyPath).then(res => res.json());
-	const res = await snarkjs.groth16.verify(loadedVKey, publicSignals, proof);
-	return res
-}
+// export async function verify(
+// 	vkeyPath: any,
+// 	{ proof, publicSignals }: Proof
+// ): Promise<boolean> {
+// 	const loadedVKey = await fetch(vkeyPath).then(res => res.json());
+// 	const res = await snarkjs.groth16.verify(loadedVKey, publicSignals, proof);
+// 	return res
+// }
 
 
 export async function revealOrDeny(
@@ -61,7 +67,7 @@ export async function revealOrDeny(
 	hash: string,
 	msg: string,
 	msgAttestation: string 
-) {
+): Promise<ProofAndVerification> {
 	const revealOrDenyStr = reveal ? 'reveal' : 'deny';
 
 	const {proof, publicSignals} = await snarkjs.groth16.fullProve(
@@ -73,8 +79,8 @@ export async function revealOrDeny(
 	console.log(`Got proof for ${revealOrDenyStr}`, proof)
 
 	const vkey = await fetch(`/${revealOrDenyStr}.vkey.json`).then((res) => res.json())
-	const res = await snarkjs.groth16.verify(vkey, publicSignals, proof)
-	console.log(`Got verification result for ${revealOrDenyStr}`, res)
+	const verified = await snarkjs.groth16.verify(vkey, publicSignals, proof)
+	console.log(`Got verification result for ${revealOrDenyStr}`, verified)
 
-	return res;
+	return { proof, publicSignals, verified };
 }
