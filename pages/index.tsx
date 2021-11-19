@@ -216,6 +216,7 @@ export default function IndexPage({ users, messages }: IndexPageProps) {
 		setSecret(localSecret)
 		if (localSecret !== null) {
 			const n = BigInt("0x" + localSecret)
+			console.log("logged in:", mimcHash(n).toString(16))
 			setPublicKey(mimcHash(n).toString(16))
 		}
 	}, [])

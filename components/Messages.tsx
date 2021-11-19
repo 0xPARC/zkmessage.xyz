@@ -84,12 +84,12 @@ async function clickSendMessage(
 const HASH_ARR_SIZE = 40
 
 export default function Messages({
-	hash,
+	publicKey,
 	secret,
 	messages,
 	selectedUsers,
 }: {
-	hash: string
+	publicKey: string
 	secret: string
 	messages: Message[]
 	selectedUsers: User[]
@@ -127,8 +127,8 @@ export default function Messages({
 						onClick={(e) => {
 							const hashes = (selectedUsers || [])
 								.map((user) => user.hash)
-								.filter((h) => h !== hash)
-								.concat([hash])
+								.filter((h) => h !== publicKey)
+								.concat([publicKey])
 							hashes.sort((a, b) => a.localeCompare(b))
 							clickSendMessage(secret, hashes, newMessage)
 						}}
@@ -160,7 +160,7 @@ export default function Messages({
 												}`}
 												type="button"
 												value="Reveal"
-												onClick={(e) => clickReveal(secret, hash, message)}
+												onClick={(e) => clickReveal(secret, publicKey, message)}
 											/>
 										)}
 									</Menu.Item>
@@ -172,7 +172,7 @@ export default function Messages({
 												}`}
 												type="button"
 												value="Deny"
-												onClick={(e) => clickDeny(secret, hash, message)}
+												onClick={(e) => clickDeny(secret, publicKey, message)}
 											/>
 										)}
 									</Menu.Item>
@@ -180,21 +180,22 @@ export default function Messages({
 							</Transition>
 						</Menu>
 					</div>
-					<div className="mb-5">{message.message}</div>
+					<div className="mb-5">{message.msgBody}</div>
 					<div className="flex text-sm">
 						<div className="flex-1 text-gray-400">
-							{message.reveals?.length > 0 ? "From " : "From one of "}
-							{(message.reveals?.length > 0
-								? message.reveals
-								: message.group || []
-							).map((r) => (
-								<UserIcon key={r} address={r} />
-							))}
+							{message.reveal ? "From " : "From one of "}
+							{message.reveal ? (
+								<UserIcon key={r.userPublicKey} address={r.userPublicKey} />
+							) : (
+								message.group.map((u) => (
+									<UserIcon key={u.publicKey} address={u.publicKey} />
+								))
+							)}
 						</div>
 						<div className="text-right text-gray-400">
-							{message.reveals?.length > 0 && "Not from "}
-							{message.denials?.map((r) => (
-								<UserIcon key={r} address={r} />
+							{message.reveal && "Not from "}
+							{message.deny?.map((d) => (
+								<UserIcon key={d.userPublicKey} address={d.userPublicKey} />
 							))}
 						</div>
 					</div>
