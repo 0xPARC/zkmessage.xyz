@@ -47,6 +47,7 @@ const twitterApiResponse = t.type({
 	}),
 	data: t.array(
 		t.type({
+			author_id: t.string,
 			id: t.string,
 			text: t.string,
 		})
@@ -74,7 +75,9 @@ export default makeHandler("/api/users", {
 			}
 
 			const data = await res.json()
+
 			if (!twitterApiResponse.is(data)) {
+				console.error(data)
 				throw new ServerError(500, "Unexpected Twitter API response")
 			}
 
@@ -82,13 +85,15 @@ export default makeHandler("/api/users", {
 				throw new ServerError(400, "No tweets matching the public key found")
 			}
 
-			const [{ id, text }] = data.data
+			const [{ id, author_id, text }] = data.data
 
 			if (text !== getTextFromPublicKey(publicKey)) {
 				throw new ServerError(500, "Invalid tweet syntax")
 			}
 
-			const { username } = data.includes.users.find((user) => user.id === id)!
+			const { username } = data.includes.users.find(
+				(user) => user.id === author_id
+			)!
 
 			await prisma.user.create({
 				data: {
