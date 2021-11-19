@@ -10,6 +10,6 @@ declare namespace snarkjs {
 			verificationKey: any,
 			publicSignals: string[],
 			proof: Object
-		)
+		): Promise<boolean>
 	}
 }

@@ -1,12 +1,17 @@
 import { Buffer } from "buffer"
 
+export interface Proof {
+	publicSignals: string[]
+	proof: Object
+}
+
 export async function prove(input: {
 	secret: string // the secret is just plain text
 	hash1: string // the hashes are all hex, no leading 0x
 	hash2: string
 	hash3: string
 	msg: string // the message is plain text
-}) {
+}): Promise<Proof> {
 	const secretHex = Buffer.from(input.secret).toString("hex")
 	const secret = secretHex ? BigInt("0x" + secretHex).toString() : "0"
 	const hash1 = BigInt("0x" + input.hash1).toString()
@@ -24,8 +29,13 @@ export async function prove(input: {
 
 	console.log("got proof", proof)
 	console.log("got public signals", publicSignals)
+	return { proof, publicSignals }
+}
 
-	const vkey = await fetch("/hash.vkey.json").then((res) => res.json())
+export async function verify(
+	vkey: any,
+	{ proof, publicSignals }: Proof
+): Promise<boolean> {
 	const res = await snarkjs.groth16.verify(vkey, publicSignals, proof)
 	console.log("got result", res)
 	return res
