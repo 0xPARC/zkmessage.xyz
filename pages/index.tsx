@@ -149,6 +149,7 @@ export default function Index(props: IndexPageProps) {
 					<Messages
 						secret={secret}
 						messages={messages}
+						selectedUsers={selectedUsers}
 					/>
 				</div>
 				<div className="col-span-1">

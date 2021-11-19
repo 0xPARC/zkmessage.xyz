@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Menu, Transition } from "@headlessui/react"
 import UserIcon from "./UserIcon"
-import { Message } from "../utils/types";
+import { User, Message } from "../utils/types";
 import { prove, revealOrDeny } from '../utils/prove';
 
 async function clickReveal(secret: string, hash: string, msg: string, msgAttestation: string) {
@@ -46,29 +46,9 @@ async function clickSendMessage(secret: string, hashes: string[], messageBody: s
 
 const HASH_ARR_SIZE = 40;
 
-export default function Messages({ secret, messages }: {secret: string, messages: Message[]} ) {
+export default function Messages({ secret, messages, selectedUsers }: {secret: string, messages: Message[], selectedUsers: User[]} ) {
 
 	const [newMessage, setNewMessage] = useState("")
-	// TODO all of these will be passed in below:
-	// hashes, userHash
-	// msgAttestation should be attached to each msg object that is 
-	// passed in 
-
-	const hashes = [
-		"14543742788565021628577424853847564376151732847602780516906950225481254681152", 
-		"8792246410719720074073794355580855662772292438409936688983564419486782556587", 
-		"20232263960898783542188327991382240596304341909893278283276037898887491633555"
-	]
-	const secrets = [
-		"0",
-		"1",
-		"2"
-	]
-	const userIdx = 0
-	secret = secrets[userIdx];
-	const userHash = hashes[userIdx];
-
-	const msgAttestation = ""
 
 	return (
 		<>
@@ -94,7 +74,7 @@ export default function Messages({ secret, messages }: {secret: string, messages
 						}`}
 						type="submit"
 						value="Send"
-						onClick={(e) => clickSendMessage(secret, hashes, newMessage)}
+						onClick={(e) => clickSendMessage(secret, selectedUsers.map((user) => user.hash), newMessage)}
 					/>
 				</form>
 			</div>
