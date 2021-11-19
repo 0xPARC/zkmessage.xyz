@@ -12,8 +12,8 @@ const postRequestHeaders = t.type({
 const postRequestBody = t.type({
 	msgBody: t.string,
 	group: t.array(t.string),
-	serializedProof: t.string,
-	serializedPublicSignals: t.string,
+	proof: t.unknown,
+	publicSignals: t.array(t.string),
 	msgAttestation: t.string,
 })
 
@@ -29,7 +29,13 @@ type GetRequestHeaders = t.TypeOf<typeof getRequestHeaders>
 type GetRequestBody = t.TypeOf<typeof getRequestBody>
 type GetResponseHeaders = { "content-type": "application/json" }
 type GetResponseBody = {
-	users: { publicKey: string; twitterHandle: string }[]
+	messages: {
+		group: string[]
+		msgBody: string
+		proof: unknown
+		publicSignals: string[]
+		msgAttestation: string
+	}[]
 }
 
 declare module "next-rest" {
@@ -63,11 +69,16 @@ export default makeHandler("/api/messages", {
 	POST: {
 		headers: postRequestHeaders.is,
 		body: postRequestBody.is,
-		exec: async ({ body: { group, ...data } }) => {
+		exec: async ({
+			body: { group, msgBody, proof, publicSignals, msgAttestation },
+		}) => {
 			const { id } = await prisma.message.create({
 				data: {
-					...data,
 					group: { connect: group.map((id) => ({ publicKey: id })) },
+					msgBody,
+					serializedProof: JSON.stringify(proof),
+					serializedPublicSignals: JSON.stringify(publicSignals),
+					msgAttestation,
 				},
 				select: { id: true },
 			})
@@ -82,13 +93,35 @@ export default makeHandler("/api/messages", {
 		headers: getRequestHeaders.is,
 		body: getRequestBody.is,
 		exec: async ({}) => {
-			const users = await prisma.user.findMany({
-				select: { publicKey: true, twitterHandle: true },
+			const messages = await prisma.message.findMany({
+				select: {
+					group: { select: { publicKey: true } },
+					msgBody: true,
+					serializedProof: true,
+					serializedPublicSignals: true,
+					msgAttestation: true,
+				},
 			})
 
 			return {
 				headers: { "content-type": "application/json" },
-				body: { users },
+				body: {
+					messages: messages.map(
+						({
+							group,
+							msgBody,
+							serializedProof,
+							serializedPublicSignals,
+							msgAttestation,
+						}) => ({
+							group: group.map((user) => user.publicKey),
+							msgBody,
+							proof: JSON.parse(serializedProof),
+							publicSignals: JSON.parse(serializedPublicSignals),
+							msgAttestation,
+						})
+					),
+				},
 			}
 		},
 	},

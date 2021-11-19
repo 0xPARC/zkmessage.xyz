@@ -5,11 +5,7 @@ import { User, Message } from "../utils/types"
 import { prove, revealOrDeny } from "../utils/prove"
 import api from "next-rest/client"
 
-async function clickReveal(
-	secret: string,
-	hash: string,
-	message: Message
-) {
+async function clickReveal(secret: string, hash: string, message: Message) {
 	// If reveal is clicked, then verify that user has indeed revealed.
 	// If the proof fails, then surface an alert that reveal failed.
 	// If the proof succeeds, then send ZK proof to backend that reveal succeeded,
@@ -31,11 +27,7 @@ async function clickReveal(
 	}
 }
 
-async function clickDeny(
-	secret: string,
-	hash: string,
-	message: Message
-) {
+async function clickDeny(secret: string, hash: string, message: Message) {
 	console.log(`Attempting to generate proof & verify deny.`)
 	const isValidProof = await revealOrDeny(
 		false,
@@ -79,8 +71,8 @@ async function clickSendMessage(
 			body: {
 				group: hashes,
 				msgBody: messageBody,
-				serializedProof: JSON.stringify(proof),
-				serializedPublicSignals: JSON.stringify(publicSignals),
+				proof: proof,
+				publicSignals: publicSignals,
 				msgAttestation: publicSignals[0],
 			},
 		})
@@ -97,7 +89,7 @@ export default function Messages({
 	messages,
 	selectedUsers,
 }: {
-	hash: string,
+	hash: string
 	secret: string
 	messages: Message[]
 	selectedUsers: User[]
@@ -167,13 +159,7 @@ export default function Messages({
 												}`}
 												type="button"
 												value="Reveal"
-												onClick={(e) =>
-													clickReveal(
-														secret,
-														hash,
-														message
-													)
-												}
+												onClick={(e) => clickReveal(secret, hash, message)}
 											/>
 										)}
 									</Menu.Item>
@@ -185,13 +171,7 @@ export default function Messages({
 												}`}
 												type="button"
 												value="Deny"
-												onClick={(e) =>
-													clickDeny(
-														secret,
-														hash,
-														message
-													)
-												}
+												onClick={(e) => clickDeny(secret, hash, message)}
 											/>
 										)}
 									</Menu.Item>
