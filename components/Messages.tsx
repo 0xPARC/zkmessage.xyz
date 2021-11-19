@@ -1,17 +1,28 @@
 import { useState } from "react"
 import { Menu, Transition } from "@headlessui/react"
 import UserIcon from "./UserIcon"
-import { User, Message } from "../utils/types";
-import { prove, revealOrDeny } from '../utils/prove';
-import api from 'next-rest/client';
+import { User, Message } from "../utils/types"
+import { prove, revealOrDeny } from "../utils/prove"
+import api from "next-rest/client"
 
-async function clickReveal(secret: string, hash: string, msg: string, msgAttestation: string) {
+async function clickReveal(
+	secret: string,
+	hash: string,
+	msg: string,
+	msgAttestation: string
+) {
 	// If reveal is clicked, then verify that user has indeed revealed.
 	// If the proof fails, then surface an alert that reveal failed.
 	// If the proof succeeds, then send ZK proof to backend that reveal succeeded,
 	// which should be reflected in the frontend.
 	console.log(`Attempting to generate proof & verify reveal.`)
-	const isValidProof = await revealOrDeny(true, secret, hash, msg, msgAttestation);
+	const isValidProof = await revealOrDeny(
+		true,
+		secret,
+		hash,
+		msg,
+		msgAttestation
+	)
 	if (isValidProof) {
 		// Send the proof to the DB & store it. Update the lists of users on the deny side.
 		// Make sure page gets refreshed.
@@ -21,9 +32,20 @@ async function clickReveal(secret: string, hash: string, msg: string, msgAttesta
 	}
 }
 
-async function clickDeny(secret: string, hash: string, msg: string, msgAttestation: string) {
+async function clickDeny(
+	secret: string,
+	hash: string,
+	msg: string,
+	msgAttestation: string
+) {
 	console.log(`Attempting to generate proof & verify deny.`)
-	const isValidProof = await revealOrDeny(false, secret, hash, msg, msgAttestation);
+	const isValidProof = await revealOrDeny(
+		false,
+		secret,
+		hash,
+		msg,
+		msgAttestation
+	)
 	if (isValidProof) {
 		// Send the proof to the DB & store it. Update the lists of users on the deny side.
 		// Make sure page gets refreshed.
@@ -33,35 +55,53 @@ async function clickDeny(secret: string, hash: string, msg: string, msgAttestati
 	}
 }
 
-async function clickSendMessage(secret: string, hashes: string[], messageBody: string) {
+async function clickSendMessage(
+	secret: string,
+	hashes: string[],
+	messageBody: string
+) {
 	if (!messageBody || messageBody === "") {
 		alert("You can't send a blank message!")
 		return
 	}
-	console.log(`Generating proof for message ${messageBody} with secret ${secret}`)
-	const { proof, publicSignals, verified } = await prove(secret, hashes,  messageBody);
+	console.log(
+		`Generating proof for message ${messageBody} with secret ${secret}`
+	)
+	const { proof, publicSignals, verified } = await prove(
+		secret,
+		hashes,
+		messageBody
+	)
 	// const verification = await verify('/hash.vkey.json', { proof, publicSignals });
-	console.log("Verification is: ", verified);
+	console.log("Verification is: ", verified)
 	if (verified) {
-		api.post('/api/messages', {
-			params: {}, headers: {'content-type': 'application/json'},
+		api.post("/api/messages", {
+			params: {},
+			headers: { "content-type": "application/json" },
 			body: {
 				group: hashes,
 				msgBody: messageBody,
 				serializedProof: JSON.stringify(proof),
 				serializedPublicSignals: JSON.stringify(publicSignals),
-				msgAttestation: publicSignals[0]
-			}
+				msgAttestation: publicSignals[0],
+			},
 		})
 	} else {
 		alert("We could not verify your message!")
 	}
 }
 
-const HASH_ARR_SIZE = 40;
+const HASH_ARR_SIZE = 40
 
-export default function Messages({ secret, messages, selectedUsers }: {secret: string, messages: Message[], selectedUsers: User[]} ) {
-
+export default function Messages({
+	secret,
+	messages,
+	selectedUsers,
+}: {
+	secret: string
+	messages: Message[]
+	selectedUsers: User[]
+}) {
 	const [newMessage, setNewMessage] = useState("")
 
 	return (
@@ -76,8 +116,12 @@ export default function Messages({ secret, messages, selectedUsers }: {secret: s
 					<input
 						disabled={!secret}
 						type="text"
-						className={`rounded-xl px-4 py-3 mr-3 flex-1 !font-monospace outline-none bg-white ${secret ? "" : "placeholder-light"}`}
-						placeholder={secret ? "Type your message here" : "Login to send a message"}
+						className={`rounded-xl px-4 py-3 mr-3 flex-1 !font-monospace outline-none bg-white ${
+							secret ? "" : "placeholder-light"
+						}`}
+						placeholder={
+							secret ? "Type your message here" : "Login to send a message"
+						}
 						value={newMessage}
 						onChange={(e) => setNewMessage(e.target.value)}
 					/>
@@ -88,7 +132,13 @@ export default function Messages({ secret, messages, selectedUsers }: {secret: s
 						}`}
 						type="submit"
 						value="Send"
-						onClick={(e) => clickSendMessage(secret, (selectedUsers || []).map((user) => user.hash), newMessage)}
+						onClick={(e) =>
+							clickSendMessage(
+								secret,
+								(selectedUsers || []).map((user) => user.hash),
+								newMessage
+							)
+						}
 					/>
 				</form>
 			</div>
@@ -117,7 +167,14 @@ export default function Messages({ secret, messages, selectedUsers }: {secret: s
 												}`}
 												type="button"
 												value="Reveal"
-												onClick={(e) => clickReveal(secret, userHash, message.message, msgAttestation)}
+												onClick={(e) =>
+													clickReveal(
+														secret,
+														userHash,
+														message.message,
+														msgAttestation
+													)
+												}
 											/>
 										)}
 									</Menu.Item>
@@ -129,7 +186,14 @@ export default function Messages({ secret, messages, selectedUsers }: {secret: s
 												}`}
 												type="button"
 												value="Deny"
-												onClick={(e) => clickDeny(secret, userHash, message.message, msgAttestation)}
+												onClick={(e) =>
+													clickDeny(
+														secret,
+														userHash,
+														message.message,
+														msgAttestation
+													)
+												}
 											/>
 										)}
 									</Menu.Item>
