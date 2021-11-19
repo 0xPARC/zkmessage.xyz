@@ -19,15 +19,23 @@ interface IndexPageProps {
 }
 
 type Message = {
-	id
-	createdAt
+	id: string
+	// createdAt: string
 	group: User[]
 	msgBody: string
 	serializedProof: string
 	serializedPublicSignals: string
 	msgAttestation: string
-	reveal
-	deny
+	reveal: {
+		id: string
+		serializedProof: string
+		userPublicKey: string
+	} | null
+	deny: {
+		id: string
+		serializedProof: string
+		userPublicKey: string
+	}[]
 }
 
 type User = {
@@ -70,6 +78,7 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 				verificationTweetId: true,
 			},
 		})
+
 		const messages = await prisma.message.findMany({
 			select: {
 				id: true,
@@ -77,6 +86,29 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 				serializedProof: true,
 				serializedPublicSignals: true,
 				msgAttestation: true,
+				group: {
+					select: {
+						publicKey: true,
+						twitterHandle: true,
+						verificationTweetId: true,
+					},
+				},
+				reveal: {
+					select: {
+						id: true,
+						// createdAt: true,
+						serializedProof: true,
+						userPublicKey: true,
+					},
+				},
+				deny: {
+					select: {
+						id: true,
+						// createdAt: true,
+						serializedProof: true,
+						userPublicKey: true,
+					},
+				},
 			},
 		})
 
@@ -86,12 +118,18 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 	}
 
 interface UsersProps {
+	publicKey: string | null
 	secret: string | null
 	users: User[]
 	handleUpdateSelectedUsers: (selectedUsers: string[]) => void
 }
 
-function Users({ hash, secret, users, handleUpdateSelectedUsers }: UsersProps) {
+function Users({
+	publicKey,
+	secret,
+	users,
+	handleUpdateSelectedUsers,
+}: UsersProps) {
 	// this is a map from public keys to twitter handles
 	const twitterHandles = useMemo(
 		() =>
@@ -109,7 +147,7 @@ function Users({ hash, secret, users, handleUpdateSelectedUsers }: UsersProps) {
 				<div
 					key={user.publicKey}
 					className={`block mb-1 flex ${
-						user.publicKey === hash ? "bg-blue-100" : ""
+						user.publicKey === publicKey ? "bg-blue-100" : ""
 					}`}
 				>
 					<label
@@ -143,9 +181,9 @@ function Users({ hash, secret, users, handleUpdateSelectedUsers }: UsersProps) {
 							className="mt-2.5"
 							type="checkbox"
 							id={user.publicKey}
-							disabled={user.publicKey === hash}
+							disabled={user.publicKey === publicKey}
 							checked={
-								user.publicKey === hash ||
+								user.publicKey === publicKey ||
 								selectedUsers.indexOf(user.publicKey) !== -1
 							}
 							onChange={() => {
@@ -168,7 +206,7 @@ function Users({ hash, secret, users, handleUpdateSelectedUsers }: UsersProps) {
 
 export default function IndexPage({ users, messages }: IndexPageProps) {
 	const [secret, setSecret] = useState<null | string>(null)
-	const [hash, setHash] = useState<null | string>(null)
+	const [publicKey, setPublicKey] = useState<null | string>(null)
 
 	// this is an array of public keys
 	const [selectedUsers, setSelectedUsers] = useState<string[]>([])
@@ -178,7 +216,7 @@ export default function IndexPage({ users, messages }: IndexPageProps) {
 		setSecret(localSecret)
 		if (localSecret !== null) {
 			const n = BigInt("0x" + localSecret)
-			setHash(mimcHash(n).toString(16))
+			setPublicKey(mimcHash(n).toString(16))
 		}
 	}, [])
 
@@ -189,7 +227,7 @@ export default function IndexPage({ users, messages }: IndexPageProps) {
 				<div className="col-span-3">
 					{messages && (
 						<Messages
-							hash={hash}
+							publicKey={publicKey}
 							secret={secret}
 							messages={messages}
 							selectedUsers={selectedUsers}
@@ -198,7 +236,7 @@ export default function IndexPage({ users, messages }: IndexPageProps) {
 				</div>
 				<div className="col-span-1">
 					<Users
-						hash={hash}
+						publicKey={publicKey}
 						secret={secret}
 						users={users}
 						handleUpdateSelectedUsers={setSelectedUsers}
