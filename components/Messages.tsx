@@ -1,10 +1,8 @@
-import { useMemo, useState, useRef } from "react"
-import { mimcHash } from "utils/mimc"
+import { useState } from "react"
 import { Menu, Transition } from "@headlessui/react"
 import UserIcon from "./UserIcon"
 import { Message } from "../utils/types";
-import { string } from "fp-ts";
-import { prove, verify, revealOrDeny } from '../utils/prove';
+import { prove, revealOrDeny } from '../utils/prove';
 
 async function clickReveal(secret: string, hash: string, msg: string, msgAttestation: string) {
 	// If reveal is clicked, then verify that user has indeed revealed.
@@ -39,7 +37,7 @@ async function clickSendMessage(secret: string, hashes: string[], messageBody: s
 		alert("You can't send a blank message!")
 	}
 	console.log(`Generating proof for message ${messageBody} with secret ${secret}`)
-	const {proof, publicSignals, verified } = await prove(secret, hashes,  messageBody);
+	const { proof, publicSignals, verified } = await prove(secret, hashes,  messageBody);
 	// const verification = await verify('/hash.vkey.json', { proof, publicSignals });
 	console.log("Verification is: ", verified);
 

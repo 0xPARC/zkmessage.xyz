@@ -107,27 +107,9 @@ export default function Index(props: IndexPageProps) {
 	useEffect(() => {
 		setSecret(localStorage.getItem(LOCAL_STORAGE_SECRET_KEY))
 	}, [])
+
 	const handleUpdateSelectedUsers = (users) => {
 		setSelectedUsers(users)
-	}
-	const handleSend = async (msg) => {
-		const hex = Buffer.from(secret).toString("hex")
-		const i = hex ? BigInt("0x" + hex) : 0n
-		const myHash = mimcHash(i).toString(16)
-		const { proof, publicSignals } = await prove({
-			secret,
-			hash1,
-			hash2,
-			hash3,
-			msg,
-		})
-		console.log("proof:", proof)
-		console.log("publicSignals:", publicSignals)
-
-		const vkey = await $.get("/public/hash.vkey.json")
-		console.log("vkey:", vkey)
-		const verification = await verify(vkey, { proof, publicSignals })
-		console.log("verification:", verification)
 	}
 
 	const messages = [
@@ -167,7 +149,6 @@ export default function Index(props: IndexPageProps) {
 					<Messages
 						secret={secret}
 						messages={messages}
-						handleSend={handleSend}
 					/>
 				</div>
 				<div className="col-span-1">
