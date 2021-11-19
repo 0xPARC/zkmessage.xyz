@@ -38,11 +38,16 @@ async function clickSendMessage(secret: string, hashes: string[], messageBody: s
 		return
 	}
 	console.log(`Generating proof for message ${messageBody} with secret ${secret}`)
-	const { proof, publicSignals, verified } = await prove(secret, hashes,  messageBody);
-	// const verification = await verify('/hash.vkey.json', { proof, publicSignals });
-	console.log("Verification is: ", verified);
+	try {
+		const {proof, publicSignals, verified } = await prove(secret, hashes,  messageBody);
+		// const verification = await verify('/hash.vkey.json', { proof, publicSignals });
+		console.log("Verification is: ", verified);
 
-	// Given the proof and the publicSignals, send it to the DB & store it
+		// Given the proof and the publicSignals, send it to the DB & store it
+	} catch (error) {
+		alert("Error posting message.")
+		console.warn(error)
+	}
 }
 
 const HASH_ARR_SIZE = 40;
