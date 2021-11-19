@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react"
 import { Buffer } from "buffer"
 
 import { LOCAL_STORAGE_SECRET_KEY } from "utils/localStorage"
-import { useRouter } from "next/dist/client/router"
+import { useRouter } from "next/router"
 
 export default function LoginPage(props: {}) {
 	const [value, setValue] = useState("")
