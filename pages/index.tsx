@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react"
 import { Buffer } from "buffer"
 import type { GetServerSideProps } from "next"
+import Link from "next/link"
 import { Menu, Transition } from "@headlessui/react"
 
 import { mimcHash } from "utils/mimc"
@@ -66,7 +67,14 @@ export default function Index(props: IndexPageProps) {
 
 	return (
 		<div className="max-w-lg m-auto font-mono">
-			<h1 className="uppercase font-bold pt-16 pb-6">zk chat</h1>
+			<div className="flex">
+				<h1 className="uppercase font-bold mt-16 mb-6 flex-1">zk chat</h1>
+				<div>
+					<Link href="/login">
+						<div className="cursor-pointer bg-pink text-white rounded-xl px-4 py-2 mt-14">Login</div>
+					</Link>
+				</div>
+			</div>
 			<div className="border border-gray-300 rounded-xl p-6">
 			<fieldset>
 				<legend>identify yourself</legend>
