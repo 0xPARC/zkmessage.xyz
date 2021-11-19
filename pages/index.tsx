@@ -15,7 +15,13 @@ import Messages from "components/Messages"
 import UserIcon from "components/UserIcon"
 
 interface IndexPageProps {
-	userCount: number
+	users: User[]
+}
+
+type User = {
+	publicKey: string
+	twitterHandle: string
+	verificationTweetId: string
 }
 
 const messages = [
@@ -45,35 +51,57 @@ const messages = [
 
 export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 	async (context) => {
-		const users = await prisma.user.findMany()
+		const users = await prisma.user.findMany({
+			select: {
+				publicKey: true,
+				twitterHandle: true,
+				verificationTweetId: true,
+			},
+		})
+
 		return {
 			props: { users },
 		}
 	}
 
-function Users({ secret, users, handleUpdateSelectedUsers }) {
-	const [selectedUsers, setSelectedUsers] = useState([])
+interface UsersProps {
+	secret: string | null
+	users: User[]
+	handleUpdateSelectedUsers: (selectedUsers: string[]) => void
+}
+
+function Users({ secret, users, handleUpdateSelectedUsers }: UsersProps) {
+	// this is a map from public keys to twitter handles
+	const twitterHandles = useMemo(
+		() =>
+			Object.fromEntries(
+				users.map((user) => [user.publicKey, user.twitterHandle])
+			),
+		[users]
+	)
+
+	const [selectedUsers, setSelectedUsers] = useState<string[]>([])
 
 	return (
 		<>
-			{users.map((u) => (
-				<div key={u.publicKey} className="block mb-1 flex">
+			{users.map((user) => (
+				<div key={user.publicKey} className="block mb-1 flex">
 					<label
-						htmlFor={u.publicKey}
+						htmlFor={user.publicKey}
 						className="flex-1 flex py-0.5 leading-tight"
 					>
-						<UserIcon address={u.twitterHandle} />
+						<UserIcon address={user.twitterHandle} />
 						<div className="flex-1 ml-3 pt-1 ">
 							<a
-								href={`https://twitter.com/${u.twitterHandle}`}
+								href={`https://twitter.com/${user.twitterHandle}`}
 								target="_blank"
 							>
 								<div className="cursor-pointer hover:underline inline-block">
-									{u.twitterHandle}
+									{user.twitterHandle}
 								</div>
 							</a>
 							<a
-								href={`https://twitter.com/${u.twitterHandle}/status/${u.verificationTweetId}`}
+								href={`https://twitter.com/${user.twitterHandle}/status/${user.verificationTweetId}`}
 								target="_blank"
 							>
 								<img
@@ -88,13 +116,13 @@ function Users({ secret, users, handleUpdateSelectedUsers }) {
 						<input
 							className="mt-2.5"
 							type="checkbox"
-							id={u.publicKey}
+							id={user.publicKey}
 							onChange={() => {
-								if (selectedUsers.indexOf(u.publicKey) === -1) {
-									setSelectedUsers(selectedUsers.concat(u.publicKey))
+								if (selectedUsers.indexOf(user.publicKey) === -1) {
+									setSelectedUsers(selectedUsers.concat(user.publicKey))
 								} else {
 									setSelectedUsers(
-										selectedUsers.filter((h) => h !== u.publicKey)
+										selectedUsers.filter((h) => h !== user.publicKey)
 									)
 								}
 								handleUpdateSelectedUsers(selectedUsers)
@@ -107,19 +135,15 @@ function Users({ secret, users, handleUpdateSelectedUsers }) {
 	)
 }
 
-export default function Index(props: IndexPageProps) {
-	const { users } = props
-	const router = useRouter()
-	const [secret, setSecret] = useState()
-	const [selectedUsers, setSelectedUsers] = useState()
+export default function IndexPage({ users }: IndexPageProps) {
+	const [secret, setSecret] = useState<null | string>(null)
+
+	// this is an array of public keys
+	const [selectedUsers, setSelectedUsers] = useState<string[]>([])
 
 	useEffect(() => {
 		setSecret(localStorage.getItem(LOCAL_STORAGE_SECRET_KEY))
 	}, [])
-
-	const handleUpdateSelectedUsers = (users) => {
-		setSelectedUsers(users)
-	}
 
 	const messages = [
 		{
@@ -164,7 +188,7 @@ export default function Index(props: IndexPageProps) {
 					<Users
 						secret={secret}
 						users={users}
-						handleUpdateSelectedUsers={handleUpdateSelectedUsers}
+						handleUpdateSelectedUsers={setSelectedUsers}
 					/>
 				</div>
 			</div>
