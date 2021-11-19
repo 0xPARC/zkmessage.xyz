@@ -70,7 +70,7 @@ interface UsersProps {
 	handleUpdateSelectedUsers: (selectedUsers: string[]) => void
 }
 
-function Users({ secret, users, handleUpdateSelectedUsers }: UsersProps) {
+function Users({ hash, secret, users, handleUpdateSelectedUsers }: UsersProps) {
 	// this is a map from public keys to twitter handles
 	const twitterHandles = useMemo(
 		() =>
@@ -117,6 +117,7 @@ function Users({ secret, users, handleUpdateSelectedUsers }: UsersProps) {
 							className="mt-2.5"
 							type="checkbox"
 							id={user.publicKey}
+							checked={user.publicKey === hash}
 							onChange={() => {
 								if (selectedUsers.indexOf(user.publicKey) === -1) {
 									setSelectedUsers(selectedUsers.concat(user.publicKey))
@@ -137,12 +138,19 @@ function Users({ secret, users, handleUpdateSelectedUsers }: UsersProps) {
 
 export default function IndexPage({ users }: IndexPageProps) {
 	const [secret, setSecret] = useState<null | string>(null)
+	const [hash, setHash] = useState<null | string>(null)
 
 	// this is an array of public keys
 	const [selectedUsers, setSelectedUsers] = useState<string[]>([])
 
 	useEffect(() => {
-		setSecret(localStorage.getItem(LOCAL_STORAGE_SECRET_KEY))
+		const localSecret = localStorage.getItem(LOCAL_STORAGE_SECRET_KEY)
+		setSecret(localSecret)
+		if (localSecret !== null) {
+			const bytes = Buffer.from(localSecret)
+			const n = BigInt(bytes.length > 0 ? "0x" + bytes.toString("hex") : 0n)
+			setHash(mimcHash(n))
+		}
 	}, [])
 
 	const messages = [
@@ -179,6 +187,7 @@ export default function IndexPage({ users }: IndexPageProps) {
 			<div className="grid grid-cols-4 gap-6 pt-2">
 				<div className="col-span-3">
 					<Messages
+						hash={hash}
 						secret={secret}
 						messages={messages}
 						selectedUsers={selectedUsers}
@@ -186,6 +195,7 @@ export default function IndexPage({ users }: IndexPageProps) {
 				</div>
 				<div className="col-span-1">
 					<Users
+						hash={hash}
 						secret={secret}
 						users={users}
 						handleUpdateSelectedUsers={setSelectedUsers}

@@ -65,7 +65,7 @@ async function clickSendMessage(
 		return
 	}
 	console.log(
-		`Generating proof for message ${messageBody} with secret ${secret}`
+		`Generating proof for message ${messageBody} with secret ${secret}, hashes ${hashes}`
 	)
 	const { proof, publicSignals, verified } = await prove(
 		secret,
@@ -94,6 +94,7 @@ async function clickSendMessage(
 const HASH_ARR_SIZE = 40
 
 export default function Messages({
+	hash,
 	secret,
 	messages,
 	selectedUsers,

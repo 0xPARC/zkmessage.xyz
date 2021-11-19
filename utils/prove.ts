@@ -30,7 +30,7 @@ export async function prove(
 	}
 
 	const { proof, publicSignals } = await snarkjs.groth16.fullProve(
-		{ msg: msgHex, secret: secret, hashes: hashes },
+		{ msg: msgHex, secret: BigInt("0x" + secret), hashes: hashes },
 		"/sign.wasm",
 		"/sign.zkey"
 	)
