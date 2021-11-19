@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react"
-import copy from 'copy-text-to-clipboard';
+import copy from "copy-text-to-clipboard"
 import { LOCAL_STORAGE_SECRET_KEY } from "utils/localStorage"
 import { mimcHash } from "utils/mimc"
 
+import { Header } from "components/Header"
 import Link from "next/link"
 import { useRouter } from "next/router"
 
@@ -24,12 +25,15 @@ export default function BackupPage(props: {}) {
 
 	return (
 		<div className="max-w-lg m-auto font-mono">
-			<h1 className="uppercase font-bold pt-16 pb-6">zk chat</h1>
+			<Header />
 			<div className="border border-gray-300 rounded-xl p-6">
 				<div>This is your ZK CHAT secret token. Save it somewhere safe:</div>
 				<textarea
 					className="block w-full outline-none py-5 px-6 my-6 resize-none text-gray-800"
-					rows={3} readonly value={secret} />
+					rows={3}
+					readOnly
+					value={secret}
+				/>
 				<input
 					className="block w-full cursor-pointer bg-gray-300 text-gray-800 rounded-xl px-4 py-2 my-4"
 					type="button"
@@ -44,6 +48,14 @@ export default function BackupPage(props: {}) {
 						Next
 					</div>
 				</Link>
+				<input
+					className="block w-full cursor-pointer bg-gray-300 text-gray-800 rounded-xl px-4 py-2 mt-8"
+					type="button"
+					value="Back"
+					onClick={() => {
+						window.history.go(-1)
+					}}
+				/>
 			</div>
 		</div>
 	)

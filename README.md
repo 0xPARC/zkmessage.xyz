@@ -20,3 +20,10 @@ Lastly initialize an empty database with
 npx prisma generate
 npx prisma db push
 ```
+
+Whenever the prisma schema changes you need to re-generate the database stuff with
+
+```
+npx prisma generate
+npx prisma db push
+```

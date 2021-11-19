@@ -11,9 +11,10 @@ datasource db {
 }
 
 model User {
-  publicKey     String    @id
-  twitterHandle String
-  messages      Message[]
+  publicKey           String    @id
+  twitterHandle       String
+  verificationTweetId String
+  messages            Message[]
 }
 
 model Message {

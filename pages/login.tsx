@@ -39,9 +39,9 @@ export default function LoginPage(props: {}) {
 		<div className="max-w-lg m-auto font-mono">
 			<Header />
 			<div className="border border-gray-300 rounded-xl p-6 text-center">
-				<input
-					className="px-4 py-3 rounded-xl outline-none border border-transparent focus:border-pink"
-					type="text"
+				<textarea
+					className="w-full resize-none px-4 py-3 rounded-xl outline-none border border-transparent"
+					rows="3"
 					placeholder="Your secret token"
 					value={value}
 					onChange={(event) => setValue(event.target.value)}
@@ -61,6 +61,14 @@ export default function LoginPage(props: {}) {
 				>
 					Sign up (generate a new secret token)
 				</button>
+				<input
+					className="block w-full cursor-pointer bg-gray-300 text-gray-800 rounded-xl px-4 py-2 mt-8"
+					type="button"
+					value="Back"
+					onClick={() => {
+						window.history.go(-1)
+					}}
+				/>
 			</div>
 		</div>
 	)
