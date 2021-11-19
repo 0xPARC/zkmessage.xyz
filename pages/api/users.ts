@@ -80,7 +80,6 @@ export default makeHandler("/api/users", {
 				console.error(data)
 				throw new ServerError(500, "Unexpected Twitter API response")
 			}
-
 			if (data.meta.result_count < 1) {
 				throw new ServerError(400, "No tweets matching the public key found")
 			}

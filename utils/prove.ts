@@ -11,18 +11,15 @@ const plaintextToHex = (str: string) => {
 	return BigInt("0x" + strHex).toString()
 }
 
-const hexStrToHex = (str: string) => {
-	return BigInt("0x" + str).toString()
-}
 
 const HASH_ARR_SIZE = 40;
 
 export async function prove(
-	secret: string, // the secret is just plain text
-	hashes: string[], // the list of hashes
+	secret: string, // secret is base10 string
+	hashes: string[], // list of base10 strings
 	msg: string // the message is plain text
 ): Promise<ProofAndVerification> {
-	const secretHex = plaintextToHex(secret);
+	// const secretHex = hexStrToHex(secret);
 	const msgHex = plaintextToHex(msg)
 	if (hashes.length < 40) {
 		hashes = hashes.concat(Array(HASH_ARR_SIZE-hashes.length).fill("0"))
@@ -31,20 +28,16 @@ export async function prove(
 		hashes = hashes.slice(0,HASH_ARR_SIZE);
 	}
 
-	const hashesHex = hashes.map((hash) => hexStrToHex(hash));
-
-	console.log(secretHex, msgHex, hashesHex)
-
 	const { proof, publicSignals } = await snarkjs.groth16.fullProve(
-		{ msg: msgHex, secret: secretHex, hashes: hashesHex },
-		"/hash.wasm",
-		"/hash.zkey"
+		{ msg: msgHex, secret: secret, hashes: hashes },
+		"/sign.wasm",
+		"/sign.zkey"
 	)
 
 	console.log("got proof", proof)
 	console.log("got public signals", publicSignals)
 
-	const vkeyPath = "/hash.vkey.json"
+	const vkeyPath = "/sign.vkey.json"
 	const loadedVKey = await fetch(vkeyPath).then(res => res.json());
 	const verified = await snarkjs.groth16.verify(loadedVKey, publicSignals, proof);
 
