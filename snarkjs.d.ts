@@ -4,12 +4,12 @@ declare namespace snarkjs {
 			input: Record<string, string>,
 			wasmPath: string,
 			zkeyPath: string
-		): Promise<{ publicSignals: string; proof: string }>
+		): Promise<{ publicSignals: string[]; proof: Object }>
 
 		async function verify(
 			verificationKey: any,
-			publicSignals: string,
-			proof: string
+			publicSignals: string[],
+			proof: Object
 		)
 	}
 }
