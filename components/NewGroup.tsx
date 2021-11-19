@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react"
 import { mimcHash } from "utils/mimc"
 
-export default function NewGroup({ secret }) {
+export default function NewGroup({ }) {
+	const [secret, setSecret] = useState("")
+
 	const hash1 = useMemo(() => {
 		const hex = Buffer.from(secret).toString("hex")
 		const i = hex ? BigInt("0x" + hex) : 0n

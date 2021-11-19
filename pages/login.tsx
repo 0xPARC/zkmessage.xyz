@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react"
-
+import Link from "next/link"
 import { useRouter } from "next/router"
 
 import { Buffer } from "buffer"
@@ -26,15 +26,6 @@ export default function LoginPage(props: {}) {
 		router.push("/backup")
 	}, [])
 
-	const handleGenerateKey = useCallback(() => {
-		console.log("generating key")
-		const array = new Uint8Array(32)
-		crypto.getRandomValues(array)
-		const secret = Buffer.from(array).toString("hex")
-		localStorage.setItem(LOCAL_STORAGE_SECRET_KEY, secret)
-		router.push("/backup")
-	}, [])
-
 	return (
 		<div className="max-w-lg m-auto font-mono">
 			<Header />
@@ -55,12 +46,11 @@ export default function LoginPage(props: {}) {
 					Login
 				</button>
 				or
-				<button
-					onClick={() => handleGenerateKey()}
-					className="block w-full cursor-pointer bg-pink text-white rounded-xl px-4 py-2 mt-2 mb-3 text-center"
-				>
-					Sign up (generate a new secret token)
-				</button>
+				<Link href="/backup">
+					<div className="block w-full cursor-pointer bg-pink text-white rounded-xl px-4 py-2 mt-2 mb-3 text-center">
+						Sign up (generate a new secret token)
+					</div>
+				</Link>
 				<input
 					className="block w-full cursor-pointer bg-gray-300 text-gray-800 rounded-xl px-4 py-2 mt-8"
 					type="button"

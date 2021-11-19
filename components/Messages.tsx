@@ -3,7 +3,7 @@ import { mimcHash } from "utils/mimc"
 import { Menu, Transition } from "@headlessui/react"
 import UserIcon from "./UserIcon"
 
-export default function Messages({ secret, messages }) {
+export default function Messages({ messages }) {
 	return (
 		<>
 			<div className="pt-6 pb-6">

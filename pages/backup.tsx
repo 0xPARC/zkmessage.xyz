@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react"
 import copy from "copy-text-to-clipboard"
-import { LOCAL_STORAGE_SECRET_KEY } from "utils/localStorage"
+import {
+	LOCAL_STORAGE_SECRET_KEY,
+	LOCAL_STORAGE_SECRET_KEY_UNVERIFIED,
+} from "utils/localStorage"
 import { mimcHash } from "utils/mimc"
 
 import { Header } from "components/Header"
@@ -13,13 +16,19 @@ export default function BackupPage(props: {}) {
 	const [copied, setCopied] = useState<boolean>(false)
 
 	useEffect(() => {
-		const secret = localStorage.getItem(LOCAL_STORAGE_SECRET_KEY)
-		if (secret === null) {
-			router.push("/login")
+		const unverifiedSecret = localStorage.getItem(
+			LOCAL_STORAGE_SECRET_KEY_UNVERIFIED
+		)
+		if (localStorage.getItem(LOCAL_STORAGE_SECRET_KEY)) {
+			router.push("/")
+		} else if (unverifiedSecret === null || unverifiedSecret.length !== 64) {
+			console.log("generating key")
+			const array = new Uint8Array(32)
+			crypto.getRandomValues(array)
+			setSecret(Buffer.from(array).toString("hex"))
+			localStorage.setItem(LOCAL_STORAGE_SECRET_KEY_UNVERIFIED, secret)
 		} else {
-			const n = BigInt("0x" + secret)
-			const h = mimcHash(n)
-			setSecret(h.toString(16))
+			setSecret(unverifiedSecret)
 		}
 	}, [])
 
