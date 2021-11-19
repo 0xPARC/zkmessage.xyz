@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react"
+import Link from "next/link"
 
 import { Buffer } from "buffer"
 
@@ -35,7 +36,7 @@ export default function LoginPage(props: {}) {
 	return (
 		<div className="max-w-lg m-auto font-mono">
 			<h1 className="uppercase font-bold pt-16 pb-6">zk chat</h1>
-			<div className="border border-gray-300 rounded-xl p-6">
+			<div className="border border-gray-300 rounded-xl p-6 text-center">
 				<input
 					type="text"
 					placeholder="Your secret token"
@@ -43,15 +44,19 @@ export default function LoginPage(props: {}) {
 					onChange={(event) => setValue(event.target.value)}
 				/>
 				<br />
-				<button disabled={value === ""} onClick={() => handleLogin(value)}>
+				<button
+					disabled={value === ""}
+					onClick={() => handleLogin(value)}
+					className="block w-full cursor-pointer bg-pink text-white rounded-xl px-4 py-2 mt-2 mb-3 text-center"
+				>
 					Login
 				</button>
-				<br />
 				or
-				<br />
-				<button onClick={() => handleGenerateKey()}>
-					Sign up (generate a new key)
-				</button>
+				<Link href="/connect">
+					<div className="cursor-pointer bg-pink text-white rounded-xl px-4 py-2 mt-3 text-center">
+						Sign up (generate a new key)
+					</div>
+				</Link>
 			</div>
 		</div>
 	)
