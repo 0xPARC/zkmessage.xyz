@@ -21,6 +21,10 @@ model User {
 model Message {
   id      String @id @default(uuid())
   authors User[]
-  content String
-  proof   Bytes
+  msgBody String
+  serializedProof   String
+  serializedPublicSignals String
+  msgAttestation String
+  revealed User?
+  denials  User[]
 }
