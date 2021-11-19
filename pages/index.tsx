@@ -1,10 +1,26 @@
 import React, { useMemo, useState } from "react"
 import { Buffer } from "buffer"
+import type { GetServerSideProps } from "next"
 
 import { mimcHash } from "utils/mimc"
 import { prove } from "utils/prove"
+import { prisma } from "utils/prisma"
 
-export default function Index(props: {}) {
+interface IndexPageProps {
+	userCount: number
+}
+
+export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
+	async (context) => {
+		const userCount = await prisma.user.count()
+		return {
+			props: { userCount },
+		}
+	}
+
+export default function Index(props: IndexPageProps) {
+	console.log("we have", props.userCount, "users")
+
 	const [secret, setSecret] = useState("")
 	const hash1 = useMemo(() => {
 		const hex = Buffer.from(secret).toString("hex")

@@ -18,16 +18,13 @@ export async function prove(input: {
 	console.log("inputs", { secret, hash1, hash2, hash3, msg })
 	const { proof, publicSignals } = await snarkjs.groth16.fullProve(
 		{ secret, hash1, hash2, hash3, msg },
-		// "/circuits/circuits-compiled/hash/circuit.wasm",
 		"/hash.wasm",
-		// "/circuits/keys/hash/circuit_final.zkey"
 		"/hash.zkey"
 	)
 
 	console.log("got proof", proof)
 	console.log("got public signals", publicSignals)
 
-	// "/circuits/keys/hash/verification_key.json"
 	const vkey = await fetch("/hash.vkey.json").then((res) => res.json())
 	const res = await snarkjs.groth16.verify(vkey, publicSignals, proof)
 	console.log("got result", res)

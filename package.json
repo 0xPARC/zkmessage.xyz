@@ -19,12 +19,14 @@
 	},
 	"homepage": "https://github.com/joeltg/zk-group-sigs-server#readme",
 	"dependencies": {
-		"@darkforest_eth/hashing": "^6.6.6",
+		"@prisma/client": "^3.5.0",
 		"buffer": "^6.0.3",
 		"next": "^12.0.4",
+		"prisma": "^3.5.0",
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2",
-		"snarkjs": "^0.4.10"
+		"snarkjs": "^0.4.10",
+		"uuid": "^8.3.2"
 	},
 	"devDependencies": {
 		"@types/react": "^17.0.35",
