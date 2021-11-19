@@ -14,7 +14,7 @@ export default function ConnectPage(props: {}) {
 					Twitter:
 				</div>
 				<input
-					className="block w-full rounded-xl px-4 py-2 mt-6"
+					className="block w-full border focus:border-blue-300 outline-none rounded-xl px-4 py-2 mt-6"
 					type="text"
 					placeholder="@SatoshiNakamoto"
 					ref={twitterRef}

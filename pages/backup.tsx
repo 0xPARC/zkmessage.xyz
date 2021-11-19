@@ -38,7 +38,7 @@ export default function BackupPage(props: {}) {
 			<div className="border border-gray-300 rounded-xl p-6">
 				<div>This is your ZK CHAT login token. Keep it secret and save it somewhere safe:</div>
 				<textarea
-					className="block w-full outline-none py-5 px-6 my-6 resize-none text-gray-800"
+					className="block w-full outline-none py-5 px-6 my-6 rounded-xl border focus:border-blue-300 resize-none text-gray-800"
 					rows={3}
 					readOnly
 					value={secret}
@@ -53,7 +53,7 @@ export default function BackupPage(props: {}) {
 					}}
 				/>
 				<Link href="/connect">
-					<div className="cursor-pointer bg-pink text-white text-center rounded-xl px-4 py-2">
+					<div className="cursor-pointer bg-pink hover:bg-midpink text-white text-center rounded-xl px-4 py-2">
 						Next
 					</div>
 				</Link>
