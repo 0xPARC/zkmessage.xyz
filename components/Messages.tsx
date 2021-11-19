@@ -6,7 +6,7 @@ import UserIcon from "./UserIcon"
 export default function Messages({ messages }) {
 	return (
 		<>
-			<div className="pt-6 pb-6">
+			<div className="pt-1 pb-6">
 				<div className="flex">
 					<input
 						type="text"

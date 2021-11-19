@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from "react"
 import { Buffer } from "buffer"
 import type { GetServerSideProps } from "next"
 import Link from "next/link"
-import { Tab } from "@headlessui/react"
 
 import { prove } from "utils/prove"
 import { prisma } from "utils/prisma"
@@ -27,12 +26,28 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 	}
 
 function Users({ users }) {
+	const [selectedUsers, setSelectedUsers] = useState([])
+
 	return (
 		<>
 			{users.map((u) => (
 				<div className="block mb-1 flex">
-					<UserIcon address={u.handle} />
-					<div className="flex-1 ml-2 pt-0.5">{u.handle}</div>
+					<label for={u.hash} className="flex-1 flex py-0.5">
+						<UserIcon address={u.handle} />
+						<div className="flex-1 ml-2 pt-0.5">{u.handle}</div>
+					</label>
+					<input
+						className="mt-3"
+						type="checkbox"
+						id={u.hash}
+						onChange={() => {
+							if (selectedUsers.indexOf(u.hash) === -1) {
+								setSelectedUsers(selectedUsers.concat(u.hash))
+							} else {
+								setSelectedUsers(selectedUsers.filter((h) => h !== u.hash))
+							}
+						}}
+					/>
 				</div>
 			))}
 		</>
@@ -93,26 +108,17 @@ export default function Index(props: IndexPageProps) {
 	]
 
 	return (
-		<div className="max-w-lg m-auto font-mono">
+		<div className="max-w-4xl m-auto font-mono">
 			<Header />
-			<Tab.Group>
-				<Tab.List>
-					<Tab>Messages</Tab>
-					<Tab>New Group</Tab>
-					<Tab>Users</Tab>
-				</Tab.List>
-				<Tab.Panels>
-					<Tab.Panel>
-						<Messages messages={messages} />
-					</Tab.Panel>
-					<Tab.Panel>
-						<NewGroup />
-					</Tab.Panel>
-					<Tab.Panel>
-						<Users users={users} />
-					</Tab.Panel>
-				</Tab.Panels>
-			</Tab.Group>
+			<div className="grid grid-cols-4 gap-6 pt-2">
+				<div className="col-span-3">
+					<Messages messages={messages} />
+				</div>
+				<div className="col-span-1">
+					<Users users={users} />
+					<NewGroup />
+				</div>
+			</div>
 		</div>
 	)
 }
