@@ -16,8 +16,8 @@ model User {
   twitterHandle       String    @unique
   verificationTweetId String    @unique
   group               Message[] @relation("group")
-  revealedMessages    Message[] @relation("revealed")
-  deniedMessages      Message[] @relation("denied")
+  reveals             Reveal[]
+  denies              Deny[]
 }
 
 model Message {
@@ -28,7 +28,26 @@ model Message {
   serializedProof         String
   serializedPublicSignals String
   msgAttestation          String
-  revealedPublicKey       String?
-  revealed                User?    @relation(name: "revealed", fields: [revealedPublicKey], references: [publicKey])
-  denials                 User[]   @relation(name: "denied")
+  reveal                  Reveal?
+  deny                    Deny[]
+}
+
+model Reveal {
+  id              String   @id @default(uuid())
+  createdAt       DateTime @default(now()) @map(name: "created_at")
+  serializedProof String
+  userPublicKey   String
+  user            User     @relation(fields: [userPublicKey], references: [publicKey])
+  messageId       String   @unique
+  message         Message  @relation(fields: [messageId], references: [id])
+}
+
+model Deny {
+  id              String   @id @default(uuid())
+  createdAt       DateTime @default(now()) @map(name: "created_at")
+  serializedProof String
+  userPublicKey   String
+  user            User     @relation(fields: [userPublicKey], references: [publicKey])
+  messageId       String
+  message         Message  @relation(fields: [messageId], references: [id])
 }
