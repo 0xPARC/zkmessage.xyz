@@ -11,7 +11,7 @@ import { useRouter } from "next/router"
 
 export default function BackupPage(props: {}) {
 	const router = useRouter()
-	const [secret, setSecret] = useState<null | string>(null)
+	const [secret, setSecret] = useState<string | null>(null)
 	const [copied, setCopied] = useState<boolean>(false)
 
 	useEffect(() => {
@@ -24,8 +24,9 @@ export default function BackupPage(props: {}) {
 			console.log("generating key")
 			const array = new Uint8Array(32)
 			crypto.getRandomValues(array)
-			setSecret(Buffer.from(array).toString("hex"))
+			const secret = Buffer.from(array).toString("hex")
 			localStorage.setItem(LOCAL_STORAGE_SECRET_KEY_UNVERIFIED, secret)
+			setSecret(secret)
 		} else {
 			setSecret(unverifiedSecret)
 		}
