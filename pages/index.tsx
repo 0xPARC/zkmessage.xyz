@@ -147,9 +147,8 @@ export default function IndexPage({ users }: IndexPageProps) {
 		const localSecret = localStorage.getItem(LOCAL_STORAGE_SECRET_KEY)
 		setSecret(localSecret)
 		if (localSecret !== null) {
-			const bytes = Buffer.from(localSecret)
-			const n = BigInt(bytes.length > 0 ? "0x" + bytes.toString("hex") : 0n)
-			setHash(mimcHash(n))
+			const n = BigInt("0x" + localSecret)
+			setHash(mimcHash(n).toString(16))
 		}
 	}, [])
 
