@@ -1,3 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+    background: #f5f5f5;
+}
 main {
 	max-width: 720px;
 	margin: auto;

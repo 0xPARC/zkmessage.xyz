@@ -35,8 +35,9 @@ export default function Index(props: IndexPageProps) {
 	const [message, setMessage] = useState("")
 
 	return (
-		<main>
-			<h1>zk-group-sigs-server</h1>
+		<div className="max-w-lg m-auto">
+			<h1 className="uppercase font-bold pt-16 pb-6">zk chat</h1>
+			<div className="border border-gray-300 rounded-xl p-6">
 			<fieldset>
 				<legend>identify yourself</legend>
 				<label>
@@ -78,19 +79,21 @@ export default function Index(props: IndexPageProps) {
 				</label>
 			</fieldset>
 			<fieldset>
-				<legend>sign a message</legend>
-				<span>message</span>
+				<legend>message</legend>
 				<br />
 				<textarea
+					className="block w-full"
 					value={message}
 					onChange={(event) => setMessage(event.target.value)}
 				/>
 				<input
+					className="bg-pink text-white rounded-xl px-4 py-2 mt-6"
 					type="button"
 					onClick={() => prove({ secret, hash1, hash2, hash3, msg: message })}
-					value="sign"
+					value="Send your first message"
 				/>
 			</fieldset>
-		</main>
+			</div>
+		</div>
 	)
 }
