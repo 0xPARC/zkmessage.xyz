@@ -4,7 +4,6 @@ import {
 	LOCAL_STORAGE_SECRET_KEY,
 	LOCAL_STORAGE_SECRET_KEY_UNVERIFIED,
 } from "utils/localStorage"
-import { mimcHash } from "utils/mimc"
 
 import { Header } from "components/Header"
 import Link from "next/link"
@@ -41,14 +40,14 @@ export default function BackupPage(props: {}) {
 					className="block w-full outline-none py-5 px-6 my-6 rounded-xl border focus:border-blue-300 resize-none text-gray-800"
 					rows={3}
 					readOnly
-					value={secret}
+					value={secret || ""}
 				/>
 				<input
 					className="block w-full cursor-pointer bg-gray-300 text-gray-800 rounded-xl px-4 py-2 my-4"
 					type="button"
 					value={copied ? "Copied!" : "Copy"}
 					onClick={() => {
-						copy(secret)
+						copy(secret || "")
 						setCopied(true)
 					}}
 				/>
