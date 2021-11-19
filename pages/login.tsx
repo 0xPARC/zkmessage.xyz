@@ -32,8 +32,8 @@ export default function LoginPage(props: {}) {
 			<div className="border border-gray-300 rounded-xl p-6">
 				<div className="text-left mb-4">Log in with a secret token:</div>
 				<textarea
-					className="w-full resize-none px-4 py-3 rounded-xl outline-none border focus:border-blue-300 outline-none"
-					rows="3"
+					className="w-full resize-none px-4 py-3 rounded-xl outline-none border border-transparent"
+					rows={3}
 					placeholder="Your secret token"
 					value={value}
 					onChange={(event) => setValue(event.target.value)}

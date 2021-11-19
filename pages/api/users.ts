@@ -2,6 +2,7 @@ import * as t from "io-ts"
 
 import { makeHandler, ServerError } from "next-rest/server"
 import { prisma } from "utils/prisma"
+import { getTextFromPublicKey, zkChatTwitterHandle } from "utils/verification"
 
 const postRequestHeaders = t.type({
 	"content-type": t.literal("application/json"),
@@ -9,7 +10,6 @@ const postRequestHeaders = t.type({
 
 const postRequestBody = t.type({
 	publicKey: t.string,
-	twitterHandle: t.string,
 })
 
 type PostRequestHeaders = t.TypeOf<typeof postRequestHeaders>
@@ -40,6 +40,11 @@ const twitterApiResponse = t.type({
 		oldest_id: t.string,
 		result_count: t.number,
 	}),
+	includes: t.type({
+		users: t.array(
+			t.type({ id: t.string, name: t.string, username: t.string })
+		),
+	}),
 	data: t.array(
 		t.type({
 			id: t.string,
@@ -52,11 +57,11 @@ export default makeHandler("/api/users", {
 	POST: {
 		headers: postRequestHeaders.is,
 		body: postRequestBody.is,
-		exec: async ({ body: { publicKey, twitterHandle } }) => {
-			const query = encodeURIComponent(`from:${twitterHandle} "${publicKey}"`)
+		exec: async ({ body: { publicKey } }) => {
+			const query = encodeURIComponent(`@${zkChatTwitterHandle} "${publicKey}"`)
 
 			const res = await fetch(
-				`https://api.twitter.com/2/tweets/search/recent?query=${query}`,
+				`https://api.twitter.com/2/tweets/search/recent?query=${query}&expansions=author_id&user.fields=username`,
 				{
 					headers: {
 						Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
@@ -79,13 +84,19 @@ export default makeHandler("/api/users", {
 
 			const [{ id, text }] = data.data
 
-			// Change this if we wrap the public key with some text or anything
-			if (text !== publicKey) {
+			if (text !== getTextFromPublicKey(publicKey)) {
 				throw new ServerError(500, "Invalid tweet syntax")
 			}
 
+			const { username } = data.includes.users.find((user) => user.id === id)!
+
 			await prisma.user.create({
-				data: { publicKey, twitterHandle, verificationTweetId: id },
+				data: {
+					publicKey,
+					twitterId: id,
+					twitterHandle: username,
+					verificationTweetId: id,
+				},
 			})
 
 			return { headers: {}, body: undefined }

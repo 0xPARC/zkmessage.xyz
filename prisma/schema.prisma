@@ -12,6 +12,7 @@ datasource db {
 
 model User {
   publicKey           String    @id
+  twitterId           String    @unique
   twitterHandle       String    @unique
   verificationTweetId String    @unique
   messages            Message[]
@@ -20,6 +21,6 @@ model User {
 model Message {
   id      String @id @default(uuid())
   authors User[]
-  body    String
+  content String
   proof   Bytes
 }
