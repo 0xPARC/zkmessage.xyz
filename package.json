@@ -19,6 +19,7 @@
 	},
 	"homepage": "https://github.com/joeltg/zk-group-sigs-server#readme",
 	"dependencies": {
+		"@headlessui/react": "^1.4.2",
 		"@prisma/client": "^3.5.0",
 		"buffer": "^6.0.3",
 		"next": "^12.0.4",
