@@ -35,6 +35,7 @@ async function clickDeny(secret: string, hash: string, msg: string, msgAttestati
 async function clickSendMessage(secret: string, hashes: string[], messageBody: string) {
 	if (!messageBody || messageBody === "") {
 		alert("You can't send a blank message!")
+		return
 	}
 	console.log(`Generating proof for message ${messageBody} with secret ${secret}`)
 	const { proof, publicSignals, verified } = await prove(secret, hashes,  messageBody);
@@ -51,12 +52,12 @@ export default function Messages({ secret, messages }: {secret: string, messages
 	const [newMessage, setNewMessage] = useState("")
 	// TODO all of these will be passed in below:
 	// hashes, userHash
-	// msgAttestation should be attached to each msg object that is 
-	// passed in 
+	// msgAttestation should be attached to each msg object that is
+	// passed in
 
 	const hashes = [
-		"14543742788565021628577424853847564376151732847602780516906950225481254681152", 
-		"8792246410719720074073794355580855662772292438409936688983564419486782556587", 
+		"14543742788565021628577424853847564376151732847602780516906950225481254681152",
+		"8792246410719720074073794355580855662772292438409936688983564419486782556587",
 		"20232263960898783542188327991382240596304341909893278283276037898887491633555"
 	]
 	const secrets = [
