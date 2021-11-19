@@ -15,6 +15,19 @@ import UserIcon from "components/UserIcon"
 
 interface IndexPageProps {
 	users: User[]
+	messages: Message[]
+}
+
+type Message = {
+	id
+	createdAt
+	group: User[]
+	msgBody: string
+	serializedProof: string
+	serializedPublicSignals: string
+	msgAttestation: string
+	reveal
+	deny
 }
 
 type User = {
@@ -23,30 +36,30 @@ type User = {
 	verificationTweetId: string
 }
 
-const messages = [
-	{
-		message: "Hello world!",
-		proof: "",
-		group: ["0", "1", "2"],
-		reveals: [],
-		denials: [],
-	},
-	{
-		message:
-			"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempo",
-		proof: "",
-		group: ["0", "1", "2"],
-		reveals: ["0"],
-		denials: ["1", "2"],
-	},
-	{
-		message: "Random message",
-		proof: "",
-		group: ["0", "1", "2"],
-		reveals: [],
-		denials: [],
-	},
-]
+// const messages = [
+// 	{
+// 		message: "Hello world!",
+// 		proof: "",
+// 		group: ["0", "1", "2"],
+// 		reveals: [],
+// 		denials: [],
+// 	},
+// 	{
+// 		message:
+// 			"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempo",
+// 		proof: "",
+// 		group: ["0", "1", "2"],
+// 		reveals: ["0"],
+// 		denials: ["1", "2"],
+// 	},
+// 	{
+// 		message: "Random message",
+// 		proof: "",
+// 		group: ["0", "1", "2"],
+// 		reveals: [],
+// 		denials: [],
+// 	},
+// ]
 
 export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 	async (context) => {
@@ -57,9 +70,18 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 				verificationTweetId: true,
 			},
 		})
+		const messages = await prisma.message.findMany({
+			select: {
+				id: true,
+				msgBody: true,
+				serializedProof: true,
+				serializedPublicSignals: true,
+				msgAttestation: true,
+			},
+		})
 
 		return {
-			props: { users },
+			props: { users, messages },
 		}
 	}
 
@@ -144,7 +166,7 @@ function Users({ hash, secret, users, handleUpdateSelectedUsers }: UsersProps) {
 	)
 }
 
-export default function IndexPage({ users }: IndexPageProps) {
+export default function IndexPage({ users, messages }: IndexPageProps) {
 	const [secret, setSecret] = useState<null | string>(null)
 	const [hash, setHash] = useState<null | string>(null)
 
@@ -160,45 +182,19 @@ export default function IndexPage({ users }: IndexPageProps) {
 		}
 	}, [])
 
-	const messages = [
-		{
-			message: "Hello world!",
-			messageAttestation: "",
-			proof: "",
-			group: ["0", "1", "2"],
-			reveals: [],
-			denials: [],
-		},
-		{
-			message:
-				"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempo",
-			messageAttestation: "",
-			proof: "",
-			group: ["0", "1", "2"],
-			reveals: ["0"],
-			denials: ["1", "2"],
-		},
-		{
-			message: "Random message",
-			messageAttestation: "",
-			proof: "",
-			group: ["0", "1", "2"],
-			reveals: [],
-			denials: [],
-		},
-	]
-
 	return (
 		<div className="max-w-4xl m-auto font-mono">
 			<Header />
 			<div className="grid grid-cols-4 gap-6 pt-2">
 				<div className="col-span-3">
-					<Messages
-						hash={hash}
-						secret={secret}
-						messages={messages}
-						selectedUsers={selectedUsers}
-					/>
+					{messages && (
+						<Messages
+							hash={hash}
+							secret={secret}
+							messages={messages}
+							selectedUsers={selectedUsers}
+						/>
+					)}
 				</div>
 				<div className="col-span-1">
 					<Users

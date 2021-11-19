@@ -183,17 +183,17 @@ export default function Messages({
 					<div className="mb-5">{message.message}</div>
 					<div className="flex text-sm">
 						<div className="flex-1 text-gray-400">
-							{message.reveals.length > 0 ? "From " : "From one of "}
-							{(message.reveals.length > 0
+							{message.reveals?.length > 0 ? "From " : "From one of "}
+							{(message.reveals?.length > 0
 								? message.reveals
-								: message.group
+								: message.group || []
 							).map((r) => (
 								<UserIcon key={r} address={r} />
 							))}
 						</div>
 						<div className="text-right text-gray-400">
-							{message.reveals.length > 0 && "Not from "}
-							{message.denials.map((r) => (
+							{message.reveals?.length > 0 && "Not from "}
+							{message.denials?.map((r) => (
 								<UserIcon key={r} address={r} />
 							))}
 						</div>
