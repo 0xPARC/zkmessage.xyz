@@ -21,13 +21,14 @@ model User {
 }
 
 model Message {
-  id                      String  @id @default(uuid())
-  group                   User[]  @relation(name: "group")
+  id                      String   @id @default(uuid())
+  createdAt               DateTime @default(now()) @map(name: "created_at")
+  group                   User[]   @relation(name: "group")
   msgBody                 String
   serializedProof         String
   serializedPublicSignals String
   msgAttestation          String
   revealedPublicKey       String?
-  revealed                User?   @relation(name: "revealed", fields: [revealedPublicKey], references: [publicKey])
-  denials                 User[]  @relation(name: "denied")
+  revealed                User?    @relation(name: "revealed", fields: [revealedPublicKey], references: [publicKey])
+  denials                 User[]   @relation(name: "denied")
 }
