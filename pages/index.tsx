@@ -37,7 +37,7 @@ function Users({ users }) {
 						<div className="flex-1 ml-2 pt-0.5">{u.handle}</div>
 					</label>
 					<input
-						className="mt-3"
+						className="mt-2.5"
 						type="checkbox"
 						id={u.hash}
 						onChange={() => {

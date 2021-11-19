@@ -27,14 +27,6 @@ export default function ConnectPage(props: {}) {
 						console.log(twitterRef.current.value)
 					}}
 				/>
-				<input
-					className="block w-full cursor-pointer bg-gray-300 text-gray-800 rounded-xl px-4 py-2 mt-6"
-					type="button"
-					value="Back"
-					onClick={() => {
-						window.history.go(-1)
-					}}
-				/>
 			</div>
 		</div>
 	)
