@@ -20,10 +20,17 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 		}
 	}
 
+export function Header() {
+	return <div className="flex-1 mt-16 mb-6">
+		<Link href="/">
+			<h1 className="inline-block cursor-pointer uppercase font-bold">zk chat</h1>
+		</Link>
+	</div>;
+}
 function UserIcon({ address }) {
-  return <div className="inline-block h-6 w-6 bg-gray-200 rounded-full text-center text-gray-400 pt-0.5 ml-0.5">
-    {address}
-  </div>;
+	return <div className="inline-block h-6 w-6 bg-gray-200 rounded-full text-center text-gray-400 pt-0.5 ml-0.5">
+		{address}
+	</div>;
 }
 export default function Index(props: IndexPageProps) {
 	console.log("we have", props.userCount, "users")
@@ -68,10 +75,10 @@ export default function Index(props: IndexPageProps) {
 	return (
 		<div className="max-w-lg m-auto font-mono">
 			<div className="flex">
-				<h1 className="uppercase font-bold mt-16 mb-6 flex-1">zk chat</h1>
+				<Header />
 				<div>
 					<Link href="/login">
-						<div className="cursor-pointer bg-pink text-white rounded-xl px-4 py-2 mt-14">Login</div>
+						<div className="cursor-pointer bg-pink hover:bg-midpink text-white rounded-xl px-4 py-2 mt-14">Login</div>
 					</Link>
 				</div>
 			</div>
@@ -125,7 +132,7 @@ export default function Index(props: IndexPageProps) {
 					onChange={(event) => setMessage(event.target.value)}
 				/>
 				<input
-					className="bg-pink text-white rounded-xl px-4 py-2 mt-6"
+					className="cursor-pointer hover:bg-midpink bg-pink text-white rounded-xl px-4 py-2 mt-6"
 					type="button"
 					onClick={() => prove({ secret, hash1, hash2, hash3, msg: message })}
 					value="Send your first message"
@@ -140,7 +147,7 @@ export default function Index(props: IndexPageProps) {
 						placeholder="Type your message here"
 					/>
 					<input
-						className="bg-pink text-white rounded-xl px-4 py-2"
+						className="cursor-pointer hover:bg-midpink bg-pink text-white rounded-xl px-4 py-2"
 						type="button"
 						value="Send"
 						onClick={() => null /* prove, then send to server */}

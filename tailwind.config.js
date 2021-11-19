@@ -7,7 +7,8 @@ module.exports = {
     },
     extend: {
       colors: {
-        pink: '#d562f2'
+        pink: '#d562f2',
+        midpink: '#c651e3'
       }
     },
   },

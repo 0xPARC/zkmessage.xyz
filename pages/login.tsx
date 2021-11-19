@@ -5,6 +5,7 @@ import { Buffer } from "buffer"
 
 import { LOCAL_STORAGE_SECRET_KEY } from "utils/localStorage"
 import { useRouter } from "next/router"
+import { Header } from "./index"
 
 export default function LoginPage(props: {}) {
 	const [value, setValue] = useState("")
@@ -35,9 +36,10 @@ export default function LoginPage(props: {}) {
 
 	return (
 		<div className="max-w-lg m-auto font-mono">
-			<h1 className="uppercase font-bold pt-16 pb-6">zk chat</h1>
+			<Header />
 			<div className="border border-gray-300 rounded-xl p-6 text-center">
 				<input
+					className="px-4 py-3 rounded-xl outline-none border border-transparent focus:border-pink"
 					type="text"
 					placeholder="Your secret token"
 					value={value}
