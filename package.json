@@ -1,0 +1,34 @@
+{
+	"name": "zk-group-sigs-server",
+	"version": "0.0.0",
+	"main": "index.js",
+	"scripts": {
+		"start": "next start",
+		"export": "next export",
+		"build": "next build",
+		"dev": "next dev",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/joeltg/zk-group-sigs-server.git"
+	},
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/joeltg/zk-group-sigs-server/issues"
+	},
+	"homepage": "https://github.com/joeltg/zk-group-sigs-server#readme",
+	"dependencies": {
+		"@darkforest_eth/hashing": "^6.6.6",
+		"buffer": "^6.0.3",
+		"next": "^12.0.4",
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2",
+		"snarkjs": "^0.4.10"
+	},
+	"devDependencies": {
+		"@types/react": "^17.0.35",
+		"@types/react-dom": "^17.0.11",
+		"typescript": "^4.5.2"
+	}
+}

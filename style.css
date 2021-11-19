@@ -1,0 +1,13 @@
+main {
+	max-width: 720px;
+	margin: auto;
+}
+
+main fieldset textarea {
+	width: 100%;
+}
+
+input[type="text"] {
+	font-family: monospace;
+	width: 100%;
+}
