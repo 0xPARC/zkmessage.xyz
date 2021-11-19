@@ -85,7 +85,12 @@ function Users({ hash, secret, users, handleUpdateSelectedUsers }: UsersProps) {
 	return (
 		<>
 			{users.map((user) => (
-				<div key={user.publicKey} className="block mb-1 flex">
+				<div
+					key={user.publicKey}
+					className={`block mb-1 flex ${
+						user.publicKey === hash ? "bg-blue-100" : ""
+					}`}
+				>
 					<label
 						htmlFor={user.publicKey}
 						className="flex-1 flex py-0.5 leading-tight"
@@ -117,7 +122,11 @@ function Users({ hash, secret, users, handleUpdateSelectedUsers }: UsersProps) {
 							className="mt-2.5"
 							type="checkbox"
 							id={user.publicKey}
-							checked={user.publicKey === hash}
+							disabled={user.publicKey === hash}
+							checked={
+								user.publicKey === hash ||
+								selectedUsers.indexOf(user.publicKey) !== -1
+							}
 							onChange={() => {
 								if (selectedUsers.indexOf(user.publicKey) === -1) {
 									setSelectedUsers(selectedUsers.concat(user.publicKey))
