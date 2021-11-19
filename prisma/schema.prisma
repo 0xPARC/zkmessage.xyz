@@ -11,23 +11,14 @@ datasource db {
 }
 
 model User {
-  id         String    @id @default(uuid())
-  handle     String?   @unique
-  twitterId  String?   @unique
-  ethAddress String?   @unique
-  groups     Group[]
-  Message    Message[]
-}
-
-model Group {
-  id    String @id @default(uuid())
-  users User[]
-  name  String
+  publicKey     String    @id
+  twitterHandle String
+  messages      Message[]
 }
 
 model Message {
-  id     String @id
-  author User   @relation(fields: [userId], references: [id])
-  userId String
-  body   String
+  id      String @id @default(uuid())
+  authors User[]
+  body    String
+  proof   Bytes
 }
