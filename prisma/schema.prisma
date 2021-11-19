@@ -17,7 +17,7 @@ model User {
   verificationTweetId String    @unique
   group               Message[] @relation("group")
   reveals             Reveal[]
-  denies              Deny[]
+  denys               Deny[]
 }
 
 model Message {

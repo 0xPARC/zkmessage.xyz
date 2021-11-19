@@ -9,7 +9,7 @@ const postRequestHeaders = t.type({
 })
 
 const postRequestBody = t.type({
-	serializedProof: t.string,
+	proof: t.unknown,
 	userPublicKey: t.string,
 	messageId: t.string,
 })
@@ -26,7 +26,7 @@ type GetRequestHeaders = t.TypeOf<typeof getRequestHeaders>
 type GetRequestBody = t.TypeOf<typeof getRequestBody>
 type GetResponseHeaders = { "content-type": "application/json" }
 type GetResponseBody = {
-	users: { userPublicKey: string; messageId: string; serializedProof: string }[]
+	reveals: { userPublicKey: string; messageId: string; proof: unknown }[]
 }
 
 declare module "next-rest" {
@@ -60,9 +60,13 @@ export default makeHandler("/api/reveal", {
 	POST: {
 		headers: postRequestHeaders.is,
 		body: postRequestBody.is,
-		exec: async ({ body }) => {
+		exec: async ({ body: { userPublicKey, messageId, proof } }) => {
 			const { id } = await prisma.reveal.create({
-				data: body,
+				data: {
+					userPublicKey,
+					messageId,
+					serializedProof: JSON.stringify(proof),
+				},
 				select: { id: true },
 			})
 
@@ -76,13 +80,21 @@ export default makeHandler("/api/reveal", {
 		headers: getRequestHeaders.is,
 		body: getRequestBody.is,
 		exec: async ({}) => {
-			const users = await prisma.reveal.findMany({
+			const reveals = await prisma.reveal.findMany({
 				select: { userPublicKey: true, messageId: true, serializedProof: true },
 			})
 
 			return {
 				headers: { "content-type": "application/json" },
-				body: { users },
+				body: {
+					reveals: reveals.map(
+						({ userPublicKey, messageId, serializedProof }) => ({
+							userPublicKey,
+							messageId,
+							proof: JSON.parse(serializedProof),
+						})
+					),
+				},
 			}
 		},
 	},
