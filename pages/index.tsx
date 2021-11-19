@@ -43,6 +43,7 @@ export default function Index(props: IndexPageProps) {
 	const messages = [
 		{
 			message: "Hello world!",
+			messageAttestation: "",
 			proof: "",
 			group: ["0", "1", "2"],
 			reveals: [],
@@ -51,6 +52,7 @@ export default function Index(props: IndexPageProps) {
 		{
 			message:
 				"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempo",
+			messageAttestation: "",
 			proof: "",
 			group: ["0", "1", "2"],
 			reveals: ["0"],
@@ -58,6 +60,7 @@ export default function Index(props: IndexPageProps) {
 		},
 		{
 			message: "Random message",
+			messageAttestation: "",
 			proof: "",
 			group: ["0", "1", "2"],
 			reveals: [],

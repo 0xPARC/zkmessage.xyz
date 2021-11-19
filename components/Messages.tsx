@@ -3,7 +3,26 @@ import { mimcHash } from "utils/mimc"
 import { Menu, Transition } from "@headlessui/react"
 import UserIcon from "./UserIcon"
 
+function clickReveal() {
+	// If reveal is clicked, then verify that user has indeed revealed.
+	// If the proof fails, then surface an alert that reveal failed.
+	// If the proof succeeds, then send ZK proof to backend that reveal succeeded,
+	// which should be reflected in the frontend.
+}
+
+function clickDeny() {
+
+}
+
+function clickSendMessage() {
+
+
+}
+
+
 export default function Messages({ secret, messages }) {
+
+
 	return (
 		<>
 			<div className="pt-6 pb-6">
@@ -17,7 +36,7 @@ export default function Messages({ secret, messages }) {
 						className="cursor-pointer hover:bg-midpink bg-pink text-white rounded-xl px-4 py-2"
 						type="button"
 						value="Send"
-						onClick={() => null /* prove, then send to server */}
+						onClick={clickSendMessage}
 					/>
 				</div>
 			</div>

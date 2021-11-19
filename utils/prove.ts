@@ -30,3 +30,38 @@ export async function prove(input: {
 	console.log("got result", res)
 	return res
 }
+
+
+const stringToHex = (str: string) => {
+	const secretHex = Buffer.from(str).toString("hex")
+	const secret = secretHex ? BigInt("0x" + secretHex).toString() : "0"
+	return secret
+}
+
+const hexStrToHex = (str: string) => {
+	return BigInt("0x" + str).toString()
+}
+
+export async function revealOrDeny(
+	reveal: boolean,
+	secret: string,
+	hash: string,
+	msg: string,
+	msgAttestation: string 
+) {
+	const revealOrDenyStr = reveal ? 'reveal' : 'deny';
+
+	const {proof, publicSignals} = await snarkjs.groth16.fullProve(
+		{secret, hash, msg, msgAttestation},
+		`/${revealOrDenyStr}.wasm`,
+		`/${revealOrDenyStr}.zkey`
+	)
+
+	console.log(`Got proof for ${revealOrDenyStr}`, proof)
+
+	const vkey = await fetch(`/${revealOrDenyStr}.vkey.json`).then((res) => res.json())
+	const res = await snarkjs.groth16.verify(vkey, publicSignals, proof)
+	console.log("Got verification result", res)
+
+	return res;
+}
