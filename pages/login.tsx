@@ -1,10 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react"
-import Link from "next/link"
+import React, { useCallback, useEffect, useState } from "react"
+
+import { useRouter } from "next/router"
 
 import { Buffer } from "buffer"
 
 import { LOCAL_STORAGE_SECRET_KEY } from "utils/localStorage"
-import { useRouter } from "next/router"
+
 import { Header } from "./index"
 
 export default function LoginPage(props: {}) {
@@ -15,23 +16,23 @@ export default function LoginPage(props: {}) {
 	useEffect(() => {
 		const secret = localStorage.getItem(LOCAL_STORAGE_SECRET_KEY)
 		if (secret !== null) {
-			Buffer.from(secret, "hex").toString()
+			setValue(secret)
 		}
-	})
-
-	const save = useCallback((secret: Buffer) => {
-		localStorage.setItem(LOCAL_STORAGE_SECRET_KEY, secret.toString("hex"))
-		router.push("/connect")
 	}, [])
 
 	const handleLogin = useCallback((value: string) => {
-		save(Buffer.from(value))
+		const _ = Buffer.from(value, "hex") // just make sure it's a valid hex string
+		localStorage.setItem(LOCAL_STORAGE_SECRET_KEY, value)
+		router.push("/backup")
 	}, [])
 
 	const handleGenerateKey = useCallback(() => {
+		console.log("generating key")
 		const array = new Uint8Array(32)
 		crypto.getRandomValues(array)
-		save(Buffer.from(array))
+		const secret = Buffer.from(array).toString("hex")
+		localStorage.setItem(LOCAL_STORAGE_SECRET_KEY, secret)
+		router.push("/backup")
 	}, [])
 
 	return (
@@ -54,11 +55,13 @@ export default function LoginPage(props: {}) {
 					Login
 				</button>
 				or
-				<Link href="/connect">
-					<div className="cursor-pointer bg-pink text-white rounded-xl px-4 py-2 mt-3 text-center">
-						Sign up (generate a new key)
-					</div>
-				</Link>
+				<button
+					disabled={value === ""}
+					onClick={() => handleGenerateKey()}
+					className="block w-full cursor-pointer bg-pink text-white rounded-xl px-4 py-2 mt-2 mb-3 text-center"
+				>
+					Sign up (generate a new secret token)
+				</button>
 			</div>
 		</div>
 	)
