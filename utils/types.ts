@@ -3,17 +3,17 @@ export type Message = {
 	// createdAt: string
 	group: string[]
 	msgBody: string
-	serializedProof: string
-	serializedPublicSignals: string
+	proof: string
+	publicSignals: string
 	msgAttestation: string
 	reveal: {
 		id: string
-		serializedProof: string
+		proof: unknown
 		userPublicKey: string
 	} | null
 	deny: {
 		id: string
-		serializedProof: string
+		proof: unknown
 		userPublicKey: string
 	}[]
 }

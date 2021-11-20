@@ -59,8 +59,20 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 			props: {
 				users,
 				initialMessages: messages.map((message) => ({
-					...message,
 					group: message.group.map((user) => user.publicKey),
+					id: message.id,
+					msgBody: message.msgBody,
+					msgAttestation: message.msgAttestation,
+					proof: JSON.parse(message.serializedProof),
+					publicSignals: JSON.parse(message.serializedPublicSignals),
+					reveal: message.reveal && {
+						...message.reveal,
+						proof: JSON.parse(message.reveal.serializedProof),
+					},
+					deny: message.deny.map((deny) => ({
+						...deny,
+						proof: JSON.parse(deny.serializedProof),
+					})),
 				})),
 			},
 		}
