@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from "react"
 import Link from "next/link"
 import { LOCAL_STORAGE_SECRET_KEY } from "utils/localStorage"
+import { User } from "utils/types"
 
-export function Header() {
+export function Header({
+	users,
+	publicKey,
+}: {
+	users?: User[] | null
+	publicKey?: string | null
+}) {
+	const user = users?.find((u) => u.publicKey === publicKey)
 	const [secret, setSecret] = useState("")
 	useEffect(() => {
 		const secret = localStorage.getItem(LOCAL_STORAGE_SECRET_KEY)
@@ -22,14 +30,33 @@ export function Header() {
 			</div>
 			<div>
 				{secret ? (
-					<div
-						className="cursor-pointer hover:underline mt-16"
-						onClick={() => {
-							localStorage.clear()
-							document.location = "/"
-						}}
-					>
-						Logout
+					<div className="mt-16">
+						<div className="inline mr-6">
+							{user ? (
+								<a
+									className="cursor-pointer hover:underline"
+									href={`https://twitter.com/${user.twitterHandle}`}
+									target="_blank"
+								>
+									{user.twitterHandle}
+								</a>
+							) : (
+								<Link href="/connect">
+									<div className="inline cursor-pointer hover:underline">
+										Connect Twitter
+									</div>
+								</Link>
+							)}
+						</div>
+						<div
+							className="inline cursor-pointer hover:underline"
+							onClick={() => {
+								localStorage.clear()
+								document.location = "/"
+							}}
+						>
+							Logout
+						</div>
 					</div>
 				) : (
 					<Link href="/login">

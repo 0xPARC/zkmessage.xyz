@@ -68,12 +68,15 @@ export function SelectUsers({
 							onChange={() => {
 								if (selectedUsers.indexOf(user.publicKey) === -1) {
 									setSelectedUsers(selectedUsers.concat(user.publicKey))
+									updateSelectedUsers(selectedUsers.concat(user.publicKey))
 								} else {
 									setSelectedUsers(
 										selectedUsers.filter((h) => h !== user.publicKey)
 									)
+									updateSelectedUsers(
+										selectedUsers.filter((h) => h !== user.publicKey)
+									)
 								}
-								updateSelectedUsers(selectedUsers)
 							}}
 						/>
 					)}
