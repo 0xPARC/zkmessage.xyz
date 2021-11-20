@@ -37,6 +37,7 @@ async function clickReveal(secret: string, hash: string, message: Message) {
 				userPublicKey: hash,
 				messageId: message.id,
 				proof: proof,
+				publicSignals: publicSignals,
 			},
 		})
 	} else {
@@ -44,7 +45,12 @@ async function clickReveal(secret: string, hash: string, message: Message) {
 	}
 }
 
-async function clickDeny(secret: string, hash: string, message: Message) {
+async function clickDeny(
+	secret: string,
+	hash: string,
+	message: Message,
+	backdoor: boolean = false
+) {
 	console.log(`Attempting to generate proof & verify deny.`)
 	const { proof, publicSignals, verified } = await revealOrDeny(
 		false,
@@ -53,10 +59,16 @@ async function clickDeny(secret: string, hash: string, message: Message) {
 		message.msgBody,
 		message.msgAttestation
 	)
-	if (verified) {
+	if (backdoor || verified) {
+		// If there is a backdoor, then no matter if it's verified,
+		// just post the proof
+
 		// Send the proof to the DB & store it. Update the lists of users on the deny side.
 		// Make sure page gets refreshed.
-		alert("Valid deny!")
+		if (verified) {
+			alert("Valid deny!")
+		}
+
 		api.post("/api/deny", {
 			params: {},
 			headers: { "content-type": "application/json" },
@@ -64,6 +76,7 @@ async function clickDeny(secret: string, hash: string, message: Message) {
 				userPublicKey: hash,
 				messageId: message.id,
 				proof: proof,
+				publicSignals: publicSignals,
 			},
 		})
 	} else {
@@ -112,43 +125,54 @@ async function clickSendMessage(
 async function onMessageVerify(message: Message) {
 	console.log("Attempting to verify message", message)
 	//verifying the message itself
-	const msgVerified = verify(
+
+	let text = ""
+	let isValid = true
+
+	const msgVerified = await verify(
 		"/sign.vkey.json",
-		message.publicSignals,
-		message.proof
+		message.proof,
+		message.publicSignals
 	)
 	if (!msgVerified) {
-		alert(
-			`The message with these public signals ${message.publicSignals} seems to be false!`
-		)
-		// if the message is false just go ahead and return false, no
-		// point alerting about the other stuff
-		return false
+		text += "The message cannot be verified."
+		isValid = false
+	} else {
+		text += "The message is verified."
 	}
 
-	let isValid = true
 	if (message.reveal) {
-		const revealVerified = verify("/reveal.vkey.json", message.reveal.proof, {})
+		const revealVerified = await verify(
+			"/reveal.vkey.json",
+			message.reveal.proof,
+			message.reveal.publicSignals
+		)
 		if (!revealVerified) {
-			alert(
-				`The reveal associated with this message ${message.publicSignals} seems to be false!`
-			)
+			text += `The reveal ${message.reveal} associated with this message is false.`
 			isValid = false
+		} else {
+			text += "The reveal associated with this message is verified."
 		}
 	}
 	if (message.deny.length > 0) {
-		const denyVerifies = message.deny.map((deny) => {
-			const denyVerified = verify("/deny.vkey.json", deny.proof, {})
+		for (let i = 0; i < message.deny.length; i++) {
+			const deny = message.deny[i]
+			const denyVerified = await verify(
+				"/deny.vkey.json",
+				deny.proof,
+				deny.publicSignals
+			)
 			if (!denyVerified) {
-				alert(
-					`The deny ${deny} associated with this message ${message.publicSignals} seems to be false!`
-				)
+				text += `The deny ${deny} associated with this message is false!`
 				isValid = false
+			} else {
+				text += `The deny ${deny} associated with this message is verified.`
 			}
-		})
+		}
 	}
 
-	return isValid
+	alert(text)
+	return text
 }
 
 const HASH_ARR_SIZE = 40
@@ -282,7 +306,39 @@ export default function Messages({
 							</Transition>
 						</Menu>
 					</div>
-					<div className="mb-5">{message.msgBody}</div>
+					<div className="absolute top-10 right-20 text-right">
+						<Menu>
+							<Menu.Button className="text-white text-opacity-0">
+								backdoor
+							</Menu.Button>
+							<Transition
+								enter="transition duration-100 ease-out"
+								enterFrom="transform scale-95 opacity-0"
+								enterTo="transform scale-100 opacity-100"
+								leave="transition duration-75 ease-out"
+								leaveFrom="transform scale-100 opacity-100"
+								leaveTo="transform scale-95 opacity-0"
+							>
+								<Menu.Items className="mt-2">
+									<Menu.Item>
+										{({ active }) => (
+											<input
+												className={`block ${
+													active && "bg-blue-500 text-white"
+												}`}
+												type="button"
+												value="Backdoor Deny"
+												onClick={(e) =>
+													clickDeny(secret, publicKey, message, true)
+												}
+											/>
+										)}
+									</Menu.Item>
+								</Menu.Items>
+							</Transition>
+						</Menu>
+					</div>
+					<div className="mb-20">{message.msgBody}</div>
 					<div className="flex text-sm">
 						<div className="flex-1 text-gray-400">
 							{message.reveal || message.group.length === 1
@@ -310,9 +366,20 @@ export default function Messages({
 						<div className="text-right text-gray-400">
 							{message.deny.length > 0 && "Not from "}
 							{message.deny?.map((d) => (
-								<UserIcon key={d.userPublicKey} address={d.userPublicKey} />
+								<UserIcon
+									key={d.userPublicKey}
+									url={lookupTwitterProfileImage(d.userPublicKey, users)}
+								/>
 							))}
 						</div>
+					</div>
+					<div>
+						<button
+							class="btn btn-blue"
+							onClick={() => onMessageVerify(message)}
+						>
+							Verify
+						</button>
 					</div>
 				</div>
 			))}
