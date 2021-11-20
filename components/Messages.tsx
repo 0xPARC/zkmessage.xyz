@@ -6,8 +6,9 @@ import { UserIcon } from "components/UserIcon"
 
 import type { Message } from "utils/types"
 import { prove, revealOrDeny } from "utils/prove"
+import { User } from "utils/types"
 
-function lookupTwitterProfileImage(publicKey: string, users: User) {
+function lookupTwitterProfileImage(publicKey: string, users: User[]) {
 	return users.find((u) => u.publicKey === publicKey)?.twitterProfileImage
 }
 
@@ -119,6 +120,7 @@ interface MessagesProps {
 		twitterHandle: string
 		verificationTweetId: string
 	}[]
+	users: User[]
 }
 
 export default function Messages({
@@ -128,9 +130,9 @@ export default function Messages({
 	selectedUsers,
 	users,
 }: MessagesProps) {
-	const [newMessage, setNewMessage] = useState("")
+	const [newMessage, setNewMessage] = useState<string>("")
 
-	const [messages, setMessages] = useState([])
+	const [messages, setMessages] = useState<Message[]>([])
 	useEffect(() => {
 		setMessages(initialMessages)
 	}, [])
@@ -178,8 +180,8 @@ export default function Messages({
 										id: "",
 										group: hashes,
 										msgBody: newMessage,
-										serializedProof: proof,
-										serializedPublicSignals: publicSignals,
+										proof,
+										publicSignals,
 										msgAttestation: attestation,
 										reveal: null,
 										deny: [],
