@@ -1,4 +1,3 @@
-*.min.js
 *.sqlite
 .env.Local
 prisma/.env
