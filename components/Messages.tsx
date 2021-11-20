@@ -237,7 +237,6 @@ export default function Messages({
 						}}
 					/>
 				</form>
-				)
 			</div>
 			{messages.length === 0 && (
 				<div className="text-gray-400">No messages yet</div>
