@@ -1,18 +1,17 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Menu, Transition } from "@headlessui/react"
 import api from "next-rest/client"
 
 import { UserIcon } from "components/UserIcon"
 
-import type { Message } from "utils/types"
+import type { Message, User } from "utils/types"
 import { prove, revealOrDeny, verify } from "utils/prove"
-import { User } from "utils/types"
 
 function lookupTwitterProfileImage(
 	publicKey: string | null,
 	users: User[]
-): string {
-	return users.find((u) => u.publicKey === publicKey)?.twitterProfileImage || ""
+): string | undefined {
+	return users.find((u) => u.publicKey === publicKey)?.twitterProfileImage
 }
 
 async function clickReveal(secret: string, hash: string, message: Message) {
@@ -91,10 +90,13 @@ async function clickSendMessage(
 		hashes,
 		messageBody
 	)
+
 	// const verification = await verify('/hash.vkey.json', { proof, publicSignals });
 	console.log("Verification is: ", verified)
 	if (verified) {
-		await api.post("/api/messages", {
+		const {
+			body: { id },
+		} = await api.post("/api/messages", {
 			params: {},
 			headers: { "content-type": "application/json" },
 			body: {
@@ -105,7 +107,7 @@ async function clickSendMessage(
 				msgAttestation: publicSignals[0],
 			},
 		})
-		return { proof, publicSignals, attestation: publicSignals[0] }
+		return { id, proof, publicSignals, attestation: publicSignals[0] }
 	} else {
 		alert("We could not verify your message!")
 		throw new Error("We could not verify your message!")
@@ -175,12 +177,45 @@ export default function Messages({
 	selectedUsers,
 	users,
 }: MessagesProps) {
-	const [newMessage, setNewMessage] = useState<string>("")
+	const [newMessage, setNewMessage] = useState("")
 
-	const [messages, setMessages] = useState<Message[]>([])
-	useEffect(() => {
-		setMessages(initialMessages)
-	}, [])
+	const [messages, setMessages] = useState(initialMessages)
+
+	const handleSubmit = useCallback(async () => {
+		if (secret === null) {
+			return
+		}
+
+		const publicKeys = selectedUsers
+			.map((user) => user.publicKey)
+			.filter((h) => h !== publicKey)
+
+		if (publicKey !== null) {
+			publicKeys.push(publicKey)
+		}
+
+		publicKeys.sort((a, b) => a.localeCompare(b))
+
+		const { id, proof, publicSignals, attestation } = await clickSendMessage(
+			secret,
+			publicKeys,
+			newMessage
+		)
+
+		const message: Message = {
+			id,
+			group: publicKeys,
+			msgBody: newMessage,
+			proof: proof,
+			publicSignals: publicSignals,
+			msgAttestation: attestation,
+			reveal: null,
+			deny: [],
+		}
+
+		setNewMessage("")
+		setMessages([message].concat(messages))
+	}, [secret])
 
 	return (
 		<>
@@ -302,16 +337,13 @@ export default function Messages({
 								{message.reveal ? (
 									<UserIcon
 										key={message.reveal.userPublicKey}
-										url={lookupTwitterProfileImage(
-											message.reveal.userPublicKey,
-											users
-										)}
+										url={message.reveal.userTwitterProfileImage}
 									/>
 								) : (
 									message.group.map((u) => (
 										<UserIcon
 											key={u}
-											url={lookupTwitterProfileImage(u, users)}
+											url={lookupTwitterProfileImage(u, users) || ""}
 										/>
 									))
 								)}
@@ -322,7 +354,7 @@ export default function Messages({
 							{message.deny?.map((d) => (
 								<UserIcon
 									key={d.userPublicKey}
-									url={lookupTwitterProfileImage(d.userPublicKey, users)}
+									url={d.userTwitterProfileImage}
 								/>
 							))}
 						</div>
