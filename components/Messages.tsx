@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Menu, Transition } from "@headlessui/react"
 import api from "next-rest/client"
 
@@ -104,6 +104,7 @@ export default function Messages({
 	selectedUsers,
 }: MessagesProps) {
 	const [newMessage, setNewMessage] = useState("")
+	const messageInputRef = useRef()
 
 	return (
 		<>
@@ -125,6 +126,7 @@ export default function Messages({
 						}
 						value={newMessage}
 						onChange={(e) => setNewMessage(e.target.value)}
+						ref={messageInputRef}
 					/>
 					<input
 						disabled={!secret}
@@ -140,6 +142,7 @@ export default function Messages({
 								.concat([publicKey])
 							hashes.sort((a, b) => a.localeCompare(b))
 							clickSendMessage(secret, hashes, newMessage)
+							messageInputRef.current.value = ""
 						}}
 					/>
 				</form>
