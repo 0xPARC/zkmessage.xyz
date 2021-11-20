@@ -1,4 +1,4 @@
-import { useState, useCallback, useContext } from "react"
+import { useState, useCallback, useContext, useEffect } from "react"
 import { Menu, Transition } from "@headlessui/react"
 import api from "next-rest/client"
 
@@ -251,7 +251,19 @@ export default function Messages({
 
 	const [messages, setMessages] = useState(initialMessages)
 
+	const [user, setUser] = useState<null | User>(null)
+	const [disabled, setDisabled] = useState<boolean>(false)
+
 	const { vkeys } = useContext(AppContext)
+
+	useEffect(() => {
+		const foundUser = users?.find((u) => u.publicKey === publicKey)
+		if (foundUser !== undefined) setUser(foundUser)
+	}, [publicKey, users])
+
+	useEffect(() => {
+		setDisabled(!secret || !user)
+	}, [secret, user])
 
 	const handleSubmit = useCallback(async () => {
 		if (secret === null) {
@@ -300,21 +312,23 @@ export default function Messages({
 					}}
 				>
 					<input
-						disabled={!secret}
+						disabled={disabled}
 						type="text"
 						className={`rounded-xl px-4 py-3 mr-3 flex-1 !font-monospace outline-none bg-white ${
-							secret ? "" : "placeholder-light"
+							!disabled ? "" : "placeholder-light"
 						}`}
 						placeholder={
-							secret ? "Type your message here" : "Login to send a message"
+							!disabled ? "Type your message here" : "Login to send a message"
 						}
 						value={newMessage}
 						onChange={(e) => setNewMessage(e.target.value)}
 					/>
 					<input
-						disabled={!secret}
+						disabled={disabled}
 						className={`text-white rounded-xl px-4 pt-2 pb-1 ${
-							secret ? "cursor-pointer bg-pink hover:bg-midpink" : "bg-gray-200"
+							!disabled
+								? "cursor-pointer bg-pink hover:bg-midpink"
+								: "bg-gray-200"
 						}`}
 						type="submit"
 						value="Post"
