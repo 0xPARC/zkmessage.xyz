@@ -34,8 +34,8 @@ export async function prove(
 	const { proof, publicSignals } = await snarkjs.groth16.fullProve(
 		{
 			msg: msgHex,
-			secret: BigInt("0x" + secret),
-			hashes: hashes.map((h) => BigInt("0x" + h)),
+			secret: BigInt("0x" + secret) as any,
+			hashes: hashes.map((h) => BigInt("0x" + h)) as any,
 		},
 		"/sign.wasm",
 		"/sign.zkey"
@@ -73,8 +73,8 @@ export async function revealOrDeny(
 	msgAttestation: string
 ): Promise<ProofAndVerification> {
 	const revealOrDenyStr = reveal ? "reveal" : "deny"
-	secret = BigInt("0x" + secret)
-	hash = BigInt("0x" + hash)
+	secret = BigInt("0x" + secret) as any
+	hash = BigInt("0x" + hash) as any
 
 	console.log("In reveal")
 	console.log(secret)

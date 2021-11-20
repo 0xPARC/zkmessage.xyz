@@ -8,8 +8,11 @@ import type { Message } from "utils/types"
 import { prove, revealOrDeny, verify } from "utils/prove"
 import { User } from "utils/types"
 
-function lookupTwitterProfileImage(publicKey: string, users: User[]) {
-	return users.find((u) => u.publicKey === publicKey)?.twitterProfileImage
+function lookupTwitterProfileImage(
+	publicKey: string | null,
+	users: User[]
+): string {
+	return users.find((u) => u.publicKey === publicKey)?.twitterProfileImage || ""
 }
 
 async function clickReveal(secret: string, hash: string, message: Message) {
@@ -154,8 +157,8 @@ async function onMessageVerify(message: Message) {
 const HASH_ARR_SIZE = 40
 
 interface MessagesProps {
-	publicKey: string
-	secret: string
+	publicKey: string | null
+	secret: string | null
 	initialMessages: Message[]
 	selectedUsers: {
 		publicKey: string
@@ -208,6 +211,7 @@ export default function Messages({
 						type="submit"
 						value="Post"
 						onClick={async (e) => {
+							if (publicKey === null || secret === null) return
 							const hashes = (selectedUsers || [])
 								.map((user) => user.publicKey)
 								.filter((h) => h !== publicKey)
@@ -233,6 +237,7 @@ export default function Messages({
 						}}
 					/>
 				</form>
+				)
 			</div>
 			{messages.length === 0 && (
 				<div className="text-gray-400">No messages yet</div>
@@ -262,7 +267,10 @@ export default function Messages({
 												}`}
 												type="button"
 												value="Reveal"
-												onClick={(e) => clickReveal(secret, publicKey, message)}
+												onClick={(e) => {
+													if (publicKey === null || secret === null) return
+													clickReveal(secret, publicKey, message)
+												}}
 											/>
 										)}
 									</Menu.Item>
@@ -274,7 +282,10 @@ export default function Messages({
 												}`}
 												type="button"
 												value="Deny"
-												onClick={(e) => clickDeny(secret, publicKey, message)}
+												onClick={(e) => {
+													if (publicKey === null || secret === null) return
+													clickDeny(secret, publicKey, message)
+												}}
 											/>
 										)}
 									</Menu.Item>
@@ -310,7 +321,10 @@ export default function Messages({
 						<div className="text-right text-gray-400">
 							{message.deny.length > 0 && "Not from "}
 							{message.deny?.map((d) => (
-								<UserIcon key={d.userPublicKey} address={d.userPublicKey} />
+								<UserIcon
+									key={d.userPublicKey}
+									url={lookupTwitterProfileImage(d.userPublicKey, users)}
+								/>
 							))}
 						</div>
 					</div>
