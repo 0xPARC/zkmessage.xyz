@@ -32,7 +32,7 @@ export function SelectUsers({
 						htmlFor={user.publicKey}
 						className="flex-1 flex py-0.5 leading-tight"
 					>
-						<UserIcon address={user.twitterHandle} />
+						<UserIcon url={user.twitterProfileImage} />
 						<div className="flex-1 ml-3 pt-1 ">
 							<a
 								href={`https://twitter.com/${user.twitterHandle}`}

@@ -7,6 +7,10 @@ import { UserIcon } from "components/UserIcon"
 import type { Message } from "utils/types"
 import { prove, revealOrDeny } from "utils/prove"
 
+function lookupTwitterProfileImage(publicKey: string, users: User) {
+	return users.find((u) => u.publicKey === publicKey)?.twitterProfileImage
+}
+
 async function clickReveal(secret: string, hash: string, message: Message) {
 	// If reveal is clicked, then verify that user has indeed revealed.
 	// If the proof fails, then surface an alert that reveal failed.
@@ -122,6 +126,7 @@ export default function Messages({
 	secret,
 	initialMessages,
 	selectedUsers,
+	users,
 }: MessagesProps) {
 	const [newMessage, setNewMessage] = useState("")
 
@@ -239,14 +244,24 @@ export default function Messages({
 							{message.reveal || message.group.length === 1
 								? "From "
 								: "From one of "}
-							{message.reveal ? (
-								<UserIcon
-									key={message.reveal.userPublicKey}
-									address={message.reveal.userPublicKey}
-								/>
-							) : (
-								message.group.map((u) => <UserIcon key={u} address={u} />)
-							)}
+							<div className="inline-block relative top-1.5">
+								{message.reveal ? (
+									<UserIcon
+										key={message.reveal.userPublicKey}
+										url={lookupTwitterProfileImage(
+											message.reveal.userPublicKey,
+											users
+										)}
+									/>
+								) : (
+									message.group.map((u) => (
+										<UserIcon
+											key={u}
+											url={lookupTwitterProfileImage(u, users)}
+										/>
+									))
+								)}
+							</div>
 						</div>
 						<div className="text-right text-gray-400">
 							{message.reveal && "Not from "}

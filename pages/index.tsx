@@ -111,6 +111,7 @@ export default function IndexPage({ users, initialMessages }: IndexPageProps) {
 						secret={secret}
 						initialMessages={initialMessages}
 						selectedUsers={selectedUsers.map((publicKey) => userMap[publicKey])}
+						users={users}
 					/>
 				</div>
 				<div className="col-span-1">
