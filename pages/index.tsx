@@ -10,10 +10,17 @@ import type { User, Message } from "utils/types"
 
 import Messages from "components/Messages"
 import { SelectUsers } from "components/SelectUsers"
+import { getVKeys } from "utils/vkey"
+import { AppContext } from "utils/context"
 
 interface IndexPageProps {
 	users: User[]
 	initialMessages: Message[]
+	vkeys: {
+		sign: any
+		reveal: any
+		deny: any
+	}
 }
 
 export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
@@ -55,8 +62,11 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 			},
 		})
 
+		const vkeys = getVKeys()
+
 		return {
 			props: {
+				vkeys,
 				users,
 				initialMessages: messages.map((message) => ({
 					group: message.group.map((user) => user.publicKey),
@@ -78,7 +88,11 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 		}
 	}
 
-export default function IndexPage({ users, initialMessages }: IndexPageProps) {
+export default function IndexPage({
+	vkeys,
+	users,
+	initialMessages,
+}: IndexPageProps) {
 	const [secret, setSecret] = useState<null | string>(null)
 	const [publicKey, setPublicKey] = useState<null | string>(null)
 
@@ -102,26 +116,30 @@ export default function IndexPage({ users, initialMessages }: IndexPageProps) {
 	}, [])
 
 	return (
-		<div className="max-w-4xl m-auto font-mono">
-			<Header />
-			<div className="grid grid-cols-4 gap-6 pt-2">
-				<div className="col-span-3">
-					<Messages
-						publicKey={publicKey}
-						secret={secret}
-						initialMessages={initialMessages}
-						selectedUsers={selectedUsers.map((publicKey) => userMap[publicKey])}
-						users={users}
-					/>
-				</div>
-				<div className="col-span-1">
-					<SelectUsers
-						publicKey={publicKey}
-						users={users}
-						updateSelectedUsers={setSelectedUsers}
-					/>
+		<AppContext.Provider value={{ vkeys }}>
+			<div className="max-w-4xl m-auto font-mono">
+				<Header />
+				<div className="grid grid-cols-4 gap-6 pt-2">
+					<div className="col-span-3">
+						<Messages
+							publicKey={publicKey}
+							secret={secret}
+							initialMessages={initialMessages}
+							selectedUsers={selectedUsers.map(
+								(publicKey) => userMap[publicKey]
+							)}
+							users={users}
+						/>
+					</div>
+					<div className="col-span-1">
+						<SelectUsers
+							publicKey={publicKey}
+							users={users}
+							updateSelectedUsers={setSelectedUsers}
+						/>
+					</div>
 				</div>
 			</div>
-		</div>
+		</AppContext.Provider>
 	)
 }
