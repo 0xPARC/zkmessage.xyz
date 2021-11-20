@@ -10,7 +10,7 @@ export default function App(props: AppProps) {
 	return (
 		<>
 			<Head>
-				<title>zk-group-sigs</title>
+				<title>zk message board</title>
 				<script src="/snarkjs.min.js" />
 			</Head>
 			<Component {...pageProps} />
