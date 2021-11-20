@@ -231,7 +231,7 @@ export default function Messages({
 										msgAttestation: attestation,
 										reveal: null,
 										deny: [],
-									},
+									} as any,
 								].concat(messages)
 							)
 						}}
