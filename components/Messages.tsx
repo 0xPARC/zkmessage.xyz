@@ -162,7 +162,7 @@ export default function Messages({
 							secret ? "cursor-pointer bg-pink hover:bg-midpink" : "bg-gray-200"
 						}`}
 						type="submit"
-						value="Send"
+						value="Post"
 						onClick={async (e) => {
 							const hashes = (selectedUsers || [])
 								.map((user) => user.publicKey)
