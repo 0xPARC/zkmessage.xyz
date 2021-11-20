@@ -31,6 +31,7 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 		})
 
 		const messages = await prisma.message.findMany({
+			orderBy: { createdAt: "desc" },
 			select: {
 				id: true,
 				msgBody: true,
