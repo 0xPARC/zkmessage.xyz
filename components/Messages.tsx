@@ -1,4 +1,4 @@
-import { useState, useRef } from "react"
+import { useState, useEffect } from "react"
 import { Menu, Transition } from "@headlessui/react"
 import api from "next-rest/client"
 
@@ -55,7 +55,7 @@ async function clickSendMessage(
 ) {
 	if (!messageBody || messageBody === "") {
 		alert("You can't send a blank message!")
-		return
+		throw new Error("You can't send a blank message!")
 	}
 	console.log(
 		`Generating proof for message ${messageBody} with secret ${secret}, hashes ${hashes}`
@@ -68,7 +68,7 @@ async function clickSendMessage(
 	// const verification = await verify('/hash.vkey.json', { proof, publicSignals });
 	console.log("Verification is: ", verified)
 	if (verified) {
-		api.post("/api/messages", {
+		await api.post("/api/messages", {
 			params: {},
 			headers: { "content-type": "application/json" },
 			body: {
@@ -79,8 +79,10 @@ async function clickSendMessage(
 				msgAttestation: publicSignals[0],
 			},
 		})
+		return { proof, publicSignals, attestation: publicSignals[0] }
 	} else {
 		alert("We could not verify your message!")
+		throw new Error("We could not verify your message!")
 	}
 }
 
@@ -89,7 +91,7 @@ const HASH_ARR_SIZE = 40
 interface MessagesProps {
 	publicKey: string
 	secret: string
-	messages: Message[]
+	initialMessages: Message[]
 	selectedUsers: {
 		publicKey: string
 		twitterHandle: string
@@ -100,11 +102,15 @@ interface MessagesProps {
 export default function Messages({
 	publicKey,
 	secret,
-	messages,
+	initialMessages,
 	selectedUsers,
 }: MessagesProps) {
 	const [newMessage, setNewMessage] = useState("")
-	const messageInputRef = useRef()
+
+	const [messages, setMessages] = useState([])
+	useEffect(() => {
+		setMessages(initialMessages)
+	}, [])
 
 	return (
 		<>
@@ -126,7 +132,6 @@ export default function Messages({
 						}
 						value={newMessage}
 						onChange={(e) => setNewMessage(e.target.value)}
-						ref={messageInputRef}
 					/>
 					<input
 						disabled={!secret}
@@ -135,14 +140,29 @@ export default function Messages({
 						}`}
 						type="submit"
 						value="Send"
-						onClick={(e) => {
+						onClick={async (e) => {
 							const hashes = (selectedUsers || [])
 								.map((user) => user.publicKey)
 								.filter((h) => h !== publicKey)
 								.concat([publicKey])
 							hashes.sort((a, b) => a.localeCompare(b))
-							clickSendMessage(secret, hashes, newMessage)
-							messageInputRef.current.value = ""
+							setNewMessage("")
+							const { proof, publicSignals, attestation } =
+								await clickSendMessage(secret, hashes, newMessage)
+							setMessages(
+								[
+									{
+										id: "",
+										group: hashes,
+										msgBody: newMessage,
+										serializedProof: proof,
+										serializedPublicSignals: publicSignals,
+										msgAttestation: attestation,
+										reveal: null,
+										deny: [],
+									},
+								].concat(messages)
+							)
 						}}
 					/>
 				</form>
@@ -195,7 +215,9 @@ export default function Messages({
 					<div className="mb-5">{message.msgBody}</div>
 					<div className="flex text-sm">
 						<div className="flex-1 text-gray-400">
-							{message.reveal ? "From " : "From one of "}
+							{message.reveal || message.group.length === 1
+								? "From "
+								: "From one of "}
 							{message.reveal ? (
 								<UserIcon
 									key={message.reveal.userPublicKey}

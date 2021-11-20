@@ -13,7 +13,7 @@ import { SelectUsers } from "components/SelectUsers"
 
 interface IndexPageProps {
 	users: User[]
-	messages: Message[]
+	initialMessages: Message[]
 }
 
 export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
@@ -58,7 +58,7 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 		return {
 			props: {
 				users,
-				messages: messages.map((message) => ({
+				initialMessages: messages.map((message) => ({
 					...message,
 					group: message.group.map((user) => user.publicKey),
 				})),
@@ -66,7 +66,7 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 		}
 	}
 
-export default function IndexPage({ users, messages }: IndexPageProps) {
+export default function IndexPage({ users, initialMessages }: IndexPageProps) {
 	const [secret, setSecret] = useState<null | string>(null)
 	const [publicKey, setPublicKey] = useState<null | string>(null)
 
@@ -98,7 +98,7 @@ export default function IndexPage({ users, messages }: IndexPageProps) {
 						<Messages
 							publicKey={publicKey}
 							secret={secret}
-							messages={messages}
+							initialMessages={initialMessages}
 							selectedUsers={selectedUsers.map(
 								(publicKey) => userMap[publicKey]
 							)}
