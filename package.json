@@ -3,7 +3,7 @@
 	"version": "0.0.0",
 	"main": "index.js",
 	"scripts": {
-		"start": "next start",
+		"start": "next start -p $PORT",
 		"export": "next export",
 		"build": "next build",
 		"dev": "next dev",
