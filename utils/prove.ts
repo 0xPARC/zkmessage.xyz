@@ -1,5 +1,7 @@
 import { Buffer } from "buffer"
 
+import type { VKeys } from "utils/types"
+
 export interface ProofAndVerification {
 	publicSignals: string[]
 	proof: Object
@@ -14,6 +16,7 @@ const plaintextToHex = (str: string) => {
 const HASH_ARR_SIZE = 40
 
 export async function prove(
+	vkeys: VKeys,
 	secret: string, // secret is base10 string
 	hashes: string[], // list of base10 strings
 	msg: string // the message is plain text
@@ -44,10 +47,8 @@ export async function prove(
 	console.log("got proof", proof)
 	console.log("got public signals", publicSignals)
 
-	const vkeyPath = "/sign.vkey.json"
-	const loadedVKey = await fetch(vkeyPath).then((res) => res.json())
 	const verified = await snarkjs.groth16.verify(
-		loadedVKey,
+		vkeys.sign,
 		publicSignals,
 		proof
 	)
@@ -56,16 +57,16 @@ export async function prove(
 }
 
 export async function verify(
-	vkeyPath: any,
+	vkey: any,
 	proof: any,
 	publicSignals: any
 ): Promise<boolean> {
-	const loadedVKey = await fetch(vkeyPath).then((res) => res.json())
-	const res = await snarkjs.groth16.verify(loadedVKey, publicSignals, proof)
+	const res = await snarkjs.groth16.verify(vkey, publicSignals, proof)
 	return res
 }
 
 export async function revealOrDeny(
+	vkeys: VKeys,
 	reveal: boolean,
 	secret: string,
 	hash: string,
@@ -92,9 +93,7 @@ export async function revealOrDeny(
 
 	console.log(`Got proof for ${revealOrDenyStr}`, proof)
 
-	const vkey = await fetch(`/${revealOrDenyStr}.vkey.json`).then((res) =>
-		res.json()
-	)
+	const vkey = vkeys[revealOrDenyStr]
 	const verified = await snarkjs.groth16.verify(vkey, publicSignals, proof)
 	console.log(`Got verification result for ${revealOrDenyStr}`, verified)
 

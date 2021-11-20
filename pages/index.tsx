@@ -6,7 +6,7 @@ import { prisma } from "utils/prisma"
 import { LOCAL_STORAGE_SECRET_KEY } from "utils/localStorage"
 import { Header } from "components/Header"
 
-import type { User, Message } from "utils/types"
+import type { User, Message, VKeys } from "utils/types"
 
 import Messages from "components/Messages"
 import { SelectUsers } from "components/SelectUsers"
@@ -16,11 +16,7 @@ import { AppContext } from "utils/context"
 interface IndexPageProps {
 	users: User[]
 	initialMessages: Message[]
-	vkeys: {
-		sign: any
-		reveal: any
-		deny: any
-	}
+	vkeys: VKeys
 }
 
 export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =

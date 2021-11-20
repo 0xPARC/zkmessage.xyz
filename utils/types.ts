@@ -26,3 +26,9 @@ export type User = {
 	verificationTweetId: string
 	twitterProfileImage: string
 }
+
+export type VKeys = {
+	sign: any
+	reveal: any
+	deny: any
+}

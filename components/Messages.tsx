@@ -1,11 +1,12 @@
-import { useState, useEffect, useCallback } from "react"
+import { useState, useCallback, useContext } from "react"
 import { Menu, Transition } from "@headlessui/react"
 import api from "next-rest/client"
 
 import { UserIcon } from "components/UserIcon"
 
-import type { Message, User } from "utils/types"
+import type { Message, User, VKeys } from "utils/types"
 import { prove, revealOrDeny, verify } from "utils/prove"
+import { AppContext } from "utils/context"
 
 function lookupTwitterProfileImage(
 	publicKey: string | null,
@@ -14,7 +15,12 @@ function lookupTwitterProfileImage(
 	return users.find((u) => u.publicKey === publicKey)?.twitterProfileImage
 }
 
-async function clickReveal(secret: string, hash: string, message: Message) {
+async function clickReveal(
+	vkeys: VKeys,
+	secret: string,
+	hash: string,
+	message: Message
+) {
 	// If reveal is clicked, then verify that user has indeed revealed.
 	// If the proof fails, then surface an alert that reveal failed.
 	// If the proof succeeds, then send ZK proof to backend that reveal succeeded,
@@ -22,6 +28,7 @@ async function clickReveal(secret: string, hash: string, message: Message) {
 	console.log(`Attempting to generate proof & verify reveal.`)
 	console.log(message)
 	const { proof, publicSignals, verified } = await revealOrDeny(
+		vkeys,
 		true,
 		secret,
 		hash,
@@ -46,9 +53,15 @@ async function clickReveal(secret: string, hash: string, message: Message) {
 	}
 }
 
-async function clickDeny(secret: string, hash: string, message: Message) {
+async function clickDeny(
+	vkeys: VKeys,
+	secret: string,
+	hash: string,
+	message: Message
+) {
 	console.log(`Attempting to generate proof & verify deny.`)
 	const { proof, publicSignals, verified } = await revealOrDeny(
+		vkeys,
 		false,
 		secret,
 		hash,
@@ -74,6 +87,7 @@ async function clickDeny(secret: string, hash: string, message: Message) {
 }
 
 async function clickSendMessage(
+	vkeys: VKeys,
 	secret: string,
 	hashes: string[],
 	messageBody: string
@@ -86,6 +100,7 @@ async function clickSendMessage(
 		`Generating proof for message ${messageBody} with secret ${secret}, hashes ${hashes}`
 	)
 	const { proof, publicSignals, verified } = await prove(
+		vkeys,
 		secret,
 		hashes,
 		messageBody
@@ -118,11 +133,14 @@ async function clickSendMessage(
 	}
 }
 
-async function onMessageVerify(message: Message) {
+async function onMessageVerify(
+	vkeys: { sign: any; reveal: any; deny: any },
+	message: Message
+) {
 	console.log("Attempting to verify message", message)
 	//verifying the message itself
 	const msgVerified = await verify(
-		"/sign.vkey.json",
+		vkeys.sign,
 		message.publicSignals,
 		message.proof
 	)
@@ -138,11 +156,7 @@ async function onMessageVerify(message: Message) {
 
 	let isValid = true
 	if (message.reveal) {
-		const revealVerified = await verify(
-			"/reveal.vkey.json",
-			message.reveal.proof,
-			{}
-		)
+		const revealVerified = await verify(vkeys.reveal, message.reveal.proof, {})
 		if (!revealVerified) {
 			alert(
 				`The reveal associated with this message ${message.publicSignals} seems to be false!`
@@ -153,7 +167,7 @@ async function onMessageVerify(message: Message) {
 	if (message.deny.length > 0) {
 		await Promise.all(
 			message.deny.map(async (deny) => {
-				const denyVerified = await verify("/deny.vkey.json", deny.proof, {})
+				const denyVerified = await verify(vkeys.deny, deny.proof, {})
 				if (!denyVerified) {
 					alert(
 						`The deny ${deny} associated with this message ${message.publicSignals} seems to be false!`
@@ -192,6 +206,8 @@ export default function Messages({
 
 	const [messages, setMessages] = useState(initialMessages)
 
+	const { vkeys } = useContext(AppContext)
+
 	const handleSubmit = useCallback(async () => {
 		if (secret === null) {
 			return
@@ -208,6 +224,7 @@ export default function Messages({
 		publicKeys.sort((a, b) => a.localeCompare(b))
 
 		const { id, proof, publicSignals, attestation } = await clickSendMessage(
+			vkeys,
 			secret,
 			publicKeys,
 			newMessage
@@ -265,7 +282,7 @@ export default function Messages({
 							hashes.sort((a, b) => a.localeCompare(b))
 							setNewMessage("")
 							const { proof, publicSignals, attestation } =
-								await clickSendMessage(secret, hashes, newMessage)
+								await clickSendMessage(vkeys, secret, hashes, newMessage)
 							setMessages(
 								[
 									{
@@ -314,7 +331,7 @@ export default function Messages({
 												value="Reveal"
 												onClick={(e) => {
 													if (publicKey === null || secret === null) return
-													clickReveal(secret, publicKey, message)
+													clickReveal(vkeys, secret, publicKey, message)
 												}}
 											/>
 										)}
@@ -329,7 +346,7 @@ export default function Messages({
 												value="Deny"
 												onClick={(e) => {
 													if (publicKey === null || secret === null) return
-													clickDeny(secret, publicKey, message)
+													clickDeny(vkeys, secret, publicKey, message)
 												}}
 											/>
 										)}

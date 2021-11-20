@@ -1,11 +1,9 @@
 import { createContext } from "react"
 
+import type { VKeys } from "utils/types"
+
 interface AppContextValue {
-	vkeys: {
-		sign: any
-		reveal: any
-		deny: any
-	}
+	vkeys: VKeys
 }
 
 export const AppContext = createContext<AppContextValue>({
