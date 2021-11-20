@@ -18,6 +18,9 @@ export function SelectUsers({
 
 	return (
 		<>
+			{users.length === 0 && (
+				<div className="text-gray-400">No registered users</div>
+			)}
 			{users.map((user) => (
 				<div
 					key={user.publicKey}
@@ -52,26 +55,28 @@ export function SelectUsers({
 						</div>
 					</label>
 
-					<input
-						className="mt-2.5"
-						type="checkbox"
-						id={user.publicKey}
-						disabled={user.publicKey === publicKey}
-						checked={
-							user.publicKey === publicKey ||
-							selectedUsers.indexOf(user.publicKey) !== -1
-						}
-						onChange={() => {
-							if (selectedUsers.indexOf(user.publicKey) === -1) {
-								setSelectedUsers(selectedUsers.concat(user.publicKey))
-							} else {
-								setSelectedUsers(
-									selectedUsers.filter((h) => h !== user.publicKey)
-								)
+					{publicKey && (
+						<input
+							className="mt-2.5"
+							type="checkbox"
+							id={user.publicKey}
+							disabled={user.publicKey === publicKey}
+							checked={
+								user.publicKey === publicKey ||
+								selectedUsers.indexOf(user.publicKey) !== -1
 							}
-							updateSelectedUsers(selectedUsers)
-						}}
-					/>
+							onChange={() => {
+								if (selectedUsers.indexOf(user.publicKey) === -1) {
+									setSelectedUsers(selectedUsers.concat(user.publicKey))
+								} else {
+									setSelectedUsers(
+										selectedUsers.filter((h) => h !== user.publicKey)
+									)
+								}
+								updateSelectedUsers(selectedUsers)
+							}}
+						/>
+					)}
 				</div>
 			))}
 		</>

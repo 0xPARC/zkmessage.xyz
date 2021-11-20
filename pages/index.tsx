@@ -94,25 +94,19 @@ export default function IndexPage({ users, initialMessages }: IndexPageProps) {
 			<Header />
 			<div className="grid grid-cols-4 gap-6 pt-2">
 				<div className="col-span-3">
-					{publicKey && secret && (
-						<Messages
-							publicKey={publicKey}
-							secret={secret}
-							initialMessages={initialMessages}
-							selectedUsers={selectedUsers.map(
-								(publicKey) => userMap[publicKey]
-							)}
-						/>
-					)}
+					<Messages
+						publicKey={publicKey}
+						secret={secret}
+						initialMessages={initialMessages}
+						selectedUsers={selectedUsers.map((publicKey) => userMap[publicKey])}
+					/>
 				</div>
 				<div className="col-span-1">
-					{publicKey && (
-						<SelectUsers
-							publicKey={publicKey}
-							users={users}
-							updateSelectedUsers={setSelectedUsers}
-						/>
-					)}
+					<SelectUsers
+						publicKey={publicKey}
+						users={users}
+						updateSelectedUsers={setSelectedUsers}
+					/>
 				</div>
 			</div>
 		</div>
