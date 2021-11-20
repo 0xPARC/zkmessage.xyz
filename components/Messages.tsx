@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react"
+import { useState, useEffect } from "react"
 import { Menu, Transition } from "@headlessui/react"
-import UserIcon from "./UserIcon"
-import { User, Message } from "../utils/types"
-import { prove, revealOrDeny } from "../utils/prove"
 import api from "next-rest/client"
+
+import { UserIcon } from "components/UserIcon"
+
+import type { Message } from "utils/types"
+import { prove, revealOrDeny } from "utils/prove"
 
 async function clickReveal(secret: string, hash: string, message: Message) {
 	// If reveal is clicked, then verify that user has indeed revealed.
@@ -71,7 +73,7 @@ async function clickSendMessage(
 ) {
 	if (!messageBody || messageBody === "") {
 		alert("You can't send a blank message!")
-		return
+		throw new Error("You can't send a blank message!")
 	}
 	console.log(
 		`Generating proof for message ${messageBody} with secret ${secret}, hashes ${hashes}`
@@ -84,7 +86,7 @@ async function clickSendMessage(
 	// const verification = await verify('/hash.vkey.json', { proof, publicSignals });
 	console.log("Verification is: ", verified)
 	if (verified) {
-		api.post("/api/messages", {
+		await api.post("/api/messages", {
 			params: {},
 			headers: { "content-type": "application/json" },
 			body: {
@@ -95,25 +97,38 @@ async function clickSendMessage(
 				msgAttestation: publicSignals[0],
 			},
 		})
+		return { proof, publicSignals, attestation: publicSignals[0] }
 	} else {
 		alert("We could not verify your message!")
+		throw new Error("We could not verify your message!")
 	}
 }
 
 const HASH_ARR_SIZE = 40
 
+interface MessagesProps {
+	publicKey: string
+	secret: string
+	initialMessages: Message[]
+	selectedUsers: {
+		publicKey: string
+		twitterHandle: string
+		verificationTweetId: string
+	}[]
+}
+
 export default function Messages({
 	publicKey,
 	secret,
-	messages,
+	initialMessages,
 	selectedUsers,
-}: {
-	publicKey: string
-	secret: string
-	messages: Message[]
-	selectedUsers: User[]
-}) {
+}: MessagesProps) {
 	const [newMessage, setNewMessage] = useState("")
+
+	const [messages, setMessages] = useState([])
+	useEffect(() => {
+		setMessages(initialMessages)
+	}, [])
 
 	return (
 		<>
@@ -143,13 +158,29 @@ export default function Messages({
 						}`}
 						type="submit"
 						value="Send"
-						onClick={(e) => {
+						onClick={async (e) => {
 							const hashes = (selectedUsers || [])
-								.map((user) => user.hash)
+								.map((user) => user.publicKey)
 								.filter((h) => h !== publicKey)
 								.concat([publicKey])
 							hashes.sort((a, b) => a.localeCompare(b))
-							clickSendMessage(secret, hashes, newMessage)
+							setNewMessage("")
+							const { proof, publicSignals, attestation } =
+								await clickSendMessage(secret, hashes, newMessage)
+							setMessages(
+								[
+									{
+										id: "",
+										group: hashes,
+										msgBody: newMessage,
+										serializedProof: proof,
+										serializedPublicSignals: publicSignals,
+										msgAttestation: attestation,
+										reveal: null,
+										deny: [],
+									},
+								].concat(messages)
+							)
 						}}
 					/>
 				</form>
@@ -202,13 +233,16 @@ export default function Messages({
 					<div className="mb-5">{message.msgBody}</div>
 					<div className="flex text-sm">
 						<div className="flex-1 text-gray-400">
-							{message.reveal ? "From " : "From one of "}
+							{message.reveal || message.group.length === 1
+								? "From "
+								: "From one of "}
 							{message.reveal ? (
-								<UserIcon key={r.userPublicKey} address={r.userPublicKey} />
+								<UserIcon
+									key={message.reveal.userPublicKey}
+									address={message.reveal.userPublicKey}
+								/>
 							) : (
-								message.group.map((u) => (
-									<UserIcon key={u.publicKey} address={u.publicKey} />
-								))
+								message.group.map((u) => <UserIcon key={u} address={u} />)
 							)}
 						</div>
 						<div className="text-right text-gray-400">
