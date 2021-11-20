@@ -125,7 +125,7 @@ export default function IndexPage({
 	return (
 		<AppContext.Provider value={{ vkeys }}>
 			<div className="max-w-4xl m-auto font-mono">
-				<Header />
+				<Header users={users} publicKey={publicKey} />
 				<div className="grid grid-cols-4 gap-6 pt-2">
 					<div className="col-span-3">
 						<Messages

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react"
 import Link from "next/link"
 import { LOCAL_STORAGE_SECRET_KEY } from "utils/localStorage"
 
-export function Header() {
+export function Header({ users, publicKey }) {
+	const user = users?.find((u) => u.publicKey === publicKey)
 	const [secret, setSecret] = useState("")
 	useEffect(() => {
 		const secret = localStorage.getItem(LOCAL_STORAGE_SECRET_KEY)
@@ -16,20 +17,39 @@ export function Header() {
 			<div className="flex-1 mt-16 mb-6">
 				<Link href="/">
 					<h1 className="inline-block cursor-pointer uppercase font-bold">
-						zk chat
+						zk message board
 					</h1>
 				</Link>
 			</div>
 			<div>
 				{secret ? (
-					<div
-						className="cursor-pointer hover:underline mt-16"
-						onClick={() => {
-							localStorage.clear()
-							document.location = "/"
-						}}
-					>
-						Logout
+					<div className="mt-16">
+						<div className="inline mr-6">
+							{user ? (
+								<a
+									className="cursor-pointer hover:underline"
+									href={`https://twitter.com/${user.twitterHandle}`}
+									target="_blank"
+								>
+									{user.twitterHandle}
+								</a>
+							) : (
+								<Link href="/connect">
+									<div className="inline cursor-pointer hover:underline">
+										Connect Twitter
+									</div>
+								</Link>
+							)}
+						</div>
+						<div
+							className="inline cursor-pointer hover:underline"
+							onClick={() => {
+								localStorage.clear()
+								document.location = "/"
+							}}
+						>
+							Logout
+						</div>
 					</div>
 				) : (
 					<Link href="/login">
