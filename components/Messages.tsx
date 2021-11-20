@@ -264,7 +264,7 @@ export default function Messages({
 							</div>
 						</div>
 						<div className="text-right text-gray-400">
-							{message.reveal && "Not from "}
+							{message.deny.length > 0 && "Not from "}
 							{message.deny?.map((d) => (
 								<UserIcon key={d.userPublicKey} address={d.userPublicKey} />
 							))}
