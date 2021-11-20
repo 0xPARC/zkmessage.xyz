@@ -1,13 +1,25 @@
-export interface Message {
-	message: string
-	messageAttestation: string
-	proof: string
+export type Message = {
+	id: string
+	// createdAt: string
 	group: string[]
-	reveals: string[]
-	denials: string[]
+	msgBody: string
+	serializedProof: string
+	serializedPublicSignals: string
+	msgAttestation: string
+	reveal: {
+		id: string
+		serializedProof: string
+		userPublicKey: string
+	} | null
+	deny: {
+		id: string
+		serializedProof: string
+		userPublicKey: string
+	}[]
 }
 
-export interface User {
-	handle: string
-	hash: string
+export type User = {
+	publicKey: string
+	twitterHandle: string
+	verificationTweetId: string
 }
