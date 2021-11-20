@@ -97,7 +97,7 @@ export default makeHandler("/api/users", {
 			await prisma.user.create({
 				data: {
 					publicKey,
-					twitterId: id,
+					twitterId: author_id,
 					twitterHandle: username,
 					verificationTweetId: id,
 				},
