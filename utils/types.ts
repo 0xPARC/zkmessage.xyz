@@ -1,4 +1,5 @@
 export interface Message {
+	id: string
 	message: string
 	messageAttestation: string
 	proof: string

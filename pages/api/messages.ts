@@ -106,7 +106,8 @@ export default makeHandler("/api/messages", {
 			return {
 				headers: { "content-type": "application/json" },
 				body: {
-					messages: messages.map(
+					// We want to reverse the array to get the most-recently added to show up first.
+					messages: messages.reverse().map(
 						({
 							group,
 							msgBody,

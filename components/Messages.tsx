@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Menu, Transition } from "@headlessui/react"
 import UserIcon from "./UserIcon"
 import { User, Message } from "../utils/types"
@@ -11,17 +11,27 @@ async function clickReveal(secret: string, hash: string, message: Message) {
 	// If the proof succeeds, then send ZK proof to backend that reveal succeeded,
 	// which should be reflected in the frontend.
 	console.log(`Attempting to generate proof & verify reveal.`)
-	const isValidProof = await revealOrDeny(
+	console.log(message)
+	const { proof, publicSignals, verified } = await revealOrDeny(
 		true,
 		secret,
 		hash,
-		message.message,
-		message.messageAttestation
+		message.msgBody,
+		message.msgAttestation
 	)
-	if (isValidProof) {
+	if (verified) {
 		// Send the proof to the DB & store it. Update the lists of users on the deny side.
 		// Make sure page gets refreshed.
 		alert("Valid reveal!")
+		api.post("/api/reveal", {
+			params: {},
+			headers: { "content-type": "application/json" },
+			body: {
+				userPublicKey: hash,
+				messageId: message.id,
+				proof: proof,
+			},
+		})
 	} else {
 		alert("You cannot reveal as having written this message! Did you write it?")
 	}
@@ -29,17 +39,26 @@ async function clickReveal(secret: string, hash: string, message: Message) {
 
 async function clickDeny(secret: string, hash: string, message: Message) {
 	console.log(`Attempting to generate proof & verify deny.`)
-	const isValidProof = await revealOrDeny(
+	const { proof, publicSignals, verified } = await revealOrDeny(
 		false,
 		secret,
 		hash,
-		message.message,
-		message.messageAttestation
+		message.msgBody,
+		message.msgAttestation
 	)
-	if (isValidProof) {
+	if (verified) {
 		// Send the proof to the DB & store it. Update the lists of users on the deny side.
 		// Make sure page gets refreshed.
 		alert("Valid deny!")
+		// api.post("/api/reveal", {
+		// 	params: {},
+		// 	headers: { "content-type": "application/json" },
+		// 	body: {
+		// 		userPublicKey: hash,
+		// 		messageId: message.id,
+		// 		proof: proof,
+		// 	},
+		// })
 	} else {
 		alert("You cannot deny this message! Perhaps you wrote it? :) Oops...")
 	}

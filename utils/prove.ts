@@ -72,9 +72,19 @@ export async function revealOrDeny(
 	msgAttestation: string
 ): Promise<ProofAndVerification> {
 	const revealOrDenyStr = reveal ? "reveal" : "deny"
+	secret = BigInt("0x" + secret);
+	hash = BigInt("0x" + hash);
+
+	console.log("In reveal");
+	console.log(secret);
+	console.log(hash);
+	console.log(msg)
+	console.log(msgAttestation);
+
+	const msgHex = plaintextToHex(msg);
 
 	const { proof, publicSignals } = await snarkjs.groth16.fullProve(
-		{ secret, hash, msg, msgAttestation },
+		{ secret: secret, hash: hash, msg: msgHex, msgAttestation: msgAttestation },
 		`/${revealOrDenyStr}.wasm`,
 		`/${revealOrDenyStr}.zkey`
 	)
