@@ -226,9 +226,12 @@ function VerifyButton({ vKeys, message }) {
 	return (
 		<div>
 			{text ? (
-				text
+				<div className="mt-2 text-sm">{text}</div>
 			) : (
-				<button className="btn btn-blue" onClick={() => handleClick()}>
+				<button
+					className="bg-gray-100 mt-2 py-1.5 pb-0.5 px-2 rounded-lg text-sm"
+					onClick={() => handleClick()}
+				>
 					Verify
 				</button>
 			)}
