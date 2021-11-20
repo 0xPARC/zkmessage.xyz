@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from "react"
 import Link from "next/link"
 import { LOCAL_STORAGE_SECRET_KEY } from "utils/localStorage"
+import { User } from "utils/types"
 
-export function Header({ users, publicKey }) {
+export function Header({
+	users,
+	publicKey,
+}: {
+	users?: User[] | null
+	publicKey?: string | null
+}) {
 	const user = users?.find((u) => u.publicKey === publicKey)
 	const [secret, setSecret] = useState("")
 	useEffect(() => {
