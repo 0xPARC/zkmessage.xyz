@@ -251,7 +251,7 @@ export default function Messages({
 					/>
 					<input
 						disabled={!secret}
-						className={`text-white rounded-xl px-4 py-2 ${
+						className={`text-white rounded-xl px-4 pt-2 pb-1 ${
 							secret ? "cursor-pointer bg-pink hover:bg-midpink" : "bg-gray-200"
 						}`}
 						type="submit"
