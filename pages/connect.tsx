@@ -13,6 +13,7 @@ import api from "next-rest/client"
 export default function ConnectPage(props: {}) {
 	const secretKey = useRef<string | null>(null)
 	const publicKey = useRef<string | null>(null)
+	const [waiting, setWaiting] = useState<boolean>(false)
 	const [intent, setIntent] = useState<string | null>(null)
 	useEffect(() => {
 		secretKey.current = localStorage.getItem(
@@ -32,10 +33,14 @@ export default function ConnectPage(props: {}) {
 	const openTwitterIntent = useCallback((intent: string) => {
 		if (intent !== null) {
 			window.open(intent)
+			setWaiting(true)
+			setTimeout(() => setWaiting(false), 10000)
 		}
 	}, [])
 
 	const createUser = useCallback(() => {
+		setWaiting(true)
+		setTimeout(() => setWaiting(false), 5000)
 		if (secretKey.current !== null && publicKey.current !== null) {
 			const secret = secretKey.current
 			api
@@ -73,11 +78,14 @@ export default function ConnectPage(props: {}) {
 					</button>
 				)}
 				<button
-					className="block w-full cursor-pointer bg-pink hover:bg-midpink text-white rounded-xl px-4 py-2 mt-3"
+					className={`block w-full cursor-pointer bg-pink hover:bg-midpink text-white rounded-xl px-4 py-2 mt-3 ${
+						waiting ? "opacity-50" : ""
+					}`}
 					type="button"
+					disabled={!!waiting}
 					onClick={() => createUser()}
 				>
-					Check
+					{waiting ? "Wait 10 seconds..." : "Check"}
 				</button>
 			</div>
 		</div>
