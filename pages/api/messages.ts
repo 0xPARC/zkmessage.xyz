@@ -20,7 +20,7 @@ const postRequestBody = t.type({
 type PostRequestHeaders = t.TypeOf<typeof postRequestHeaders>
 type PostRequestBody = t.TypeOf<typeof postRequestBody>
 type PostResponseHeaders = { location: string }
-type PostResponseBody = void
+type PostResponseBody = { id: string }
 
 const getRequestHeaders = t.type({ accept: t.literal("application/json") })
 const getRequestBody = t.void
@@ -85,7 +85,7 @@ export default makeHandler("/api/messages", {
 
 			return {
 				headers: { location: `/m/${id}` },
-				body: undefined,
+				body: { id },
 			}
 		},
 	},
@@ -107,21 +107,23 @@ export default makeHandler("/api/messages", {
 				headers: { "content-type": "application/json" },
 				body: {
 					// We want to reverse the array to get the most-recently added to show up first.
-					messages: messages.reverse().map(
-						({
-							group,
-							msgBody,
-							serializedProof,
-							serializedPublicSignals,
-							msgAttestation,
-						}) => ({
-							group: group.map((user) => user.publicKey),
-							msgBody,
-							proof: JSON.parse(serializedProof),
-							publicSignals: JSON.parse(serializedPublicSignals),
-							msgAttestation,
-						})
-					),
+					messages: messages
+						.reverse()
+						.map(
+							({
+								group,
+								msgBody,
+								serializedProof,
+								serializedPublicSignals,
+								msgAttestation,
+							}) => ({
+								group: group.map((user) => user.publicKey),
+								msgBody,
+								proof: JSON.parse(serializedProof),
+								publicSignals: JSON.parse(serializedPublicSignals),
+								msgAttestation,
+							})
+						),
 				},
 			}
 		},
