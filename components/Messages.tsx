@@ -160,10 +160,10 @@ async function onMessageVerify(
 	)
 
 	if (!msgVerified) {
-		text += "The message cannot be verified."
+		text += "🚨 The message cannot be verified."
 		isValid = false
 	} else {
-		text += "The message is verified."
+		text += "✅ The message is verified."
 	}
 
 	if (message.reveal) {
@@ -174,10 +174,10 @@ async function onMessageVerify(
 			message.reveal.publicSignals
 		)
 		if (!revealVerified) {
-			text += `\nThe reveal ${message.reveal} associated with this message is false.`
+			text += `\n🚨 The reveal associated with this message is false.`
 			isValid = false
 		} else {
-			text += "\nThe reveal associated with this message is verified."
+			text += "\n✅ The reveal associated with this message is verified."
 		}
 	}
 	if (message.deny.length > 0) {
@@ -190,15 +190,15 @@ async function onMessageVerify(
 				deny.publicSignals
 			)
 			if (!denyVerified) {
-				text += `\nThe deny ${deny.userPublicKey} associated with this message is false!`
+				text += `\n🚨 The deny ${deny.userPublicKey} associated with this message is false!`
 				isValid = false
 			} else {
-				text += `\nThe deny ${deny} associated with this message is verified.`
+				text += `\n✅ The deny ${deny.userPublicKey} associated with this message is verified.`
 			}
 		}
 	}
 
-	alert(text)
+	// alert(text)
 	return text
 }
 
@@ -226,7 +226,7 @@ function VerifyButton({ vKeys, message }) {
 	return (
 		<div>
 			{text ? (
-				<div className="mt-2 text-sm">{text}</div>
+				<div className="mt-2 text-xs whitespace-pre-line">{text}</div>
 			) : (
 				<button
 					className="bg-gray-100 mt-2 py-1.5 pb-0.5 px-2 rounded-lg text-sm"

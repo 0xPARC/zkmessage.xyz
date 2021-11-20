@@ -16,7 +16,7 @@ export function Header() {
 			<div className="flex-1 mt-16 mb-6">
 				<Link href="/">
 					<h1 className="inline-block cursor-pointer uppercase font-bold">
-						zk chat
+						zk message board
 					</h1>
 				</Link>
 			</div>
