@@ -42,7 +42,12 @@ const twitterApiResponse = t.type({
 	}),
 	includes: t.type({
 		users: t.array(
-			t.type({ id: t.string, name: t.string, username: t.string })
+			t.type({
+				id: t.string,
+				name: t.string,
+				username: t.string,
+				profile_image_url: t.string,
+			})
 		),
 	}),
 	data: t.array(
@@ -60,9 +65,9 @@ export default makeHandler("/api/users", {
 		body: postRequestBody.is,
 		exec: async ({ body: { publicKey } }) => {
 			const query = encodeURIComponent(`@${zkChatTwitterHandle} "${publicKey}"`)
-
+			console.log(query)
 			const res = await fetch(
-				`https://api.twitter.com/2/tweets/search/recent?query=${query}&expansions=author_id&user.fields=username`,
+				`https://api.twitter.com/2/tweets/search/recent?query=${query}&expansions=author_id&user.fields=username,profile_image_url`,
 				{
 					headers: {
 						Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
@@ -76,21 +81,26 @@ export default makeHandler("/api/users", {
 
 			const data = await res.json()
 
+			console.log(data)
+
 			if (!twitterApiResponse.is(data)) {
 				console.error(data)
 				throw new ServerError(500, "Unexpected Twitter API response")
 			}
+
 			if (data.meta.result_count < 1) {
 				throw new ServerError(400, "No tweets matching the public key found")
 			}
 
 			const [{ id, author_id, text }] = data.data
 
+			console.log(data.includes.users)
+
 			if (text !== getTextFromPublicKey(publicKey)) {
 				throw new ServerError(500, "Invalid tweet syntax")
 			}
 
-			const { username } = data.includes.users.find(
+			const { username, profile_image_url } = data.includes.users.find(
 				(user) => user.id === author_id
 			)!
 
@@ -100,8 +110,11 @@ export default makeHandler("/api/users", {
 					twitterId: author_id,
 					twitterHandle: username,
 					verificationTweetId: id,
+					twitterProfileImage: profile_image_url,
 				},
 			})
+
+			console.log("returning")
 
 			return { headers: {}, body: undefined }
 		},

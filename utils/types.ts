@@ -22,4 +22,5 @@ export type User = {
 	publicKey: string
 	twitterHandle: string
 	verificationTweetId: string
+	twitterProfileImage: string
 }

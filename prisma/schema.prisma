@@ -14,6 +14,7 @@ model User {
   publicKey           String    @id
   twitterId           String    @unique
   twitterHandle       String    @unique
+  twitterProfileImage String
   verificationTweetId String    @unique
   group               Message[] @relation("group")
   reveals             Reveal[]

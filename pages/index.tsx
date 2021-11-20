@@ -23,6 +23,7 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 				publicKey: true,
 				twitterHandle: true,
 				verificationTweetId: true,
+				twitterProfileImage: true,
 			},
 		})
 
