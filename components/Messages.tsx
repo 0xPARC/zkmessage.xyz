@@ -1,18 +1,26 @@
-import { useState, useEffect } from "react"
+import { useState, useCallback, useContext } from "react"
 import { Menu, Transition } from "@headlessui/react"
 import api from "next-rest/client"
 
 import { UserIcon } from "components/UserIcon"
 
-import type { Message } from "utils/types"
+import type { Message, User, VKeys } from "utils/types"
 import { prove, revealOrDeny, verify } from "utils/prove"
-import { User } from "utils/types"
+import { AppContext } from "utils/context"
 
-function lookupTwitterProfileImage(publicKey: string, users: User[]) {
+function lookupTwitterProfileImage(
+	publicKey: string | null,
+	users: User[]
+): string | undefined {
 	return users.find((u) => u.publicKey === publicKey)?.twitterProfileImage
 }
 
-async function clickReveal(secret: string, hash: string, message: Message) {
+async function clickReveal(
+	vkeys: VKeys,
+	secret: string,
+	hash: string,
+	message: Message
+) {
 	// If reveal is clicked, then verify that user has indeed revealed.
 	// If the proof fails, then surface an alert that reveal failed.
 	// If the proof succeeds, then send ZK proof to backend that reveal succeeded,
@@ -20,6 +28,7 @@ async function clickReveal(secret: string, hash: string, message: Message) {
 	console.log(`Attempting to generate proof & verify reveal.`)
 	console.log(message)
 	const { proof, publicSignals, verified } = await revealOrDeny(
+		vkeys,
 		true,
 		secret,
 		hash,
@@ -30,7 +39,7 @@ async function clickReveal(secret: string, hash: string, message: Message) {
 		// Send the proof to the DB & store it. Update the lists of users on the deny side.
 		// Make sure page gets refreshed.
 		alert("Valid reveal!")
-		api.post("/api/reveal", {
+		await api.post("/api/reveal", {
 			params: {},
 			headers: { "content-type": "application/json" },
 			body: {
@@ -46,13 +55,21 @@ async function clickReveal(secret: string, hash: string, message: Message) {
 }
 
 async function clickDeny(
+<<<<<<< HEAD
 	secret: string,
 	hash: string,
 	message: Message,
 	backdoor: boolean = false
+=======
+	vkeys: VKeys,
+	secret: string,
+	hash: string,
+	message: Message
+>>>>>>> efa75be8bb272b0af29eaedfda5f7efe03d0b9d4
 ) {
 	console.log(`Attempting to generate proof & verify deny.`)
 	const { proof, publicSignals, verified } = await revealOrDeny(
+		vkeys,
 		false,
 		secret,
 		hash,
@@ -85,6 +102,7 @@ async function clickDeny(
 }
 
 async function clickSendMessage(
+	vkeys: VKeys,
 	secret: string,
 	hashes: string[],
 	messageBody: string
@@ -97,16 +115,23 @@ async function clickSendMessage(
 		`Generating proof for message ${messageBody} with secret ${secret}, hashes ${hashes}`
 	)
 	const { proof, publicSignals, verified } = await prove(
+		vkeys,
 		secret,
 		hashes,
 		messageBody
 	)
+
 	// const verification = await verify('/hash.vkey.json', { proof, publicSignals });
 	console.log("Verification is: ", verified)
 	if (verified) {
-		await api.post("/api/messages", {
+		const {
+			headers: { etag },
+		} = await api.post("/api/messages", {
 			params: {},
-			headers: { "content-type": "application/json" },
+			headers: {
+				"content-type": "application/json",
+				accept: "application/json",
+			},
 			body: {
 				group: hashes,
 				msgBody: messageBody,
@@ -115,14 +140,18 @@ async function clickSendMessage(
 				msgAttestation: publicSignals[0],
 			},
 		})
-		return { proof, publicSignals, attestation: publicSignals[0] }
+
+		return { id: etag, proof, publicSignals, attestation: publicSignals[0] }
 	} else {
 		alert("We could not verify your message!")
 		throw new Error("We could not verify your message!")
 	}
 }
 
-async function onMessageVerify(message: Message) {
+async function onMessageVerify(
+	// vkeys: { sign: any; reveal: any; deny: any },
+	message: Message
+) {
 	console.log("Attempting to verify message", message)
 	//verifying the message itself
 
@@ -134,6 +163,7 @@ async function onMessageVerify(message: Message) {
 		message.proof,
 		message.publicSignals
 	)
+
 	if (!msgVerified) {
 		text += "The message cannot be verified."
 		isValid = false
@@ -178,8 +208,8 @@ async function onMessageVerify(message: Message) {
 const HASH_ARR_SIZE = 40
 
 interface MessagesProps {
-	publicKey: string
-	secret: string
+	publicKey: string | null
+	secret: string | null
 	initialMessages: Message[]
 	selectedUsers: {
 		publicKey: string
@@ -196,12 +226,48 @@ export default function Messages({
 	selectedUsers,
 	users,
 }: MessagesProps) {
-	const [newMessage, setNewMessage] = useState<string>("")
+	const [newMessage, setNewMessage] = useState("")
 
-	const [messages, setMessages] = useState<Message[]>([])
-	useEffect(() => {
-		setMessages(initialMessages)
-	}, [])
+	const [messages, setMessages] = useState(initialMessages)
+
+	const { vkeys } = useContext(AppContext)
+
+	const handleSubmit = useCallback(async () => {
+		if (secret === null) {
+			return
+		}
+
+		const publicKeys = selectedUsers
+			.map((user) => user.publicKey)
+			.filter((h) => h !== publicKey)
+
+		if (publicKey !== null) {
+			publicKeys.push(publicKey)
+		}
+
+		publicKeys.sort((a, b) => a.localeCompare(b))
+
+		const { id, proof, publicSignals, attestation } = await clickSendMessage(
+			vkeys,
+			secret,
+			publicKeys,
+			newMessage
+		)
+
+		const message: Message = {
+			id,
+			group: publicKeys,
+			msgBody: newMessage,
+			proof: proof,
+			publicSignals: publicSignals,
+			msgAttestation: attestation,
+			reveal: null,
+			deny: [],
+		}
+
+		setNewMessage("")
+		setMessages([message].concat(messages))
+	}, [secret])
 
 	return (
 		<>
@@ -226,12 +292,13 @@ export default function Messages({
 					/>
 					<input
 						disabled={!secret}
-						className={`text-white rounded-xl px-4 py-2 ${
+						className={`text-white rounded-xl px-4 pt-2 pb-1 ${
 							secret ? "cursor-pointer bg-pink hover:bg-midpink" : "bg-gray-200"
 						}`}
 						type="submit"
 						value="Post"
 						onClick={async (e) => {
+							if (publicKey === null || secret === null) return
 							const hashes = (selectedUsers || [])
 								.map((user) => user.publicKey)
 								.filter((h) => h !== publicKey)
@@ -239,7 +306,7 @@ export default function Messages({
 							hashes.sort((a, b) => a.localeCompare(b))
 							setNewMessage("")
 							const { proof, publicSignals, attestation } =
-								await clickSendMessage(secret, hashes, newMessage)
+								await clickSendMessage(vkeys, secret, hashes, newMessage)
 							setMessages(
 								[
 									{
@@ -251,7 +318,7 @@ export default function Messages({
 										msgAttestation: attestation,
 										reveal: null,
 										deny: [],
-									},
+									} as any,
 								].concat(messages)
 							)
 						}}
@@ -286,7 +353,10 @@ export default function Messages({
 												}`}
 												type="button"
 												value="Reveal"
-												onClick={(e) => clickReveal(secret, publicKey, message)}
+												onClick={(e) => {
+													if (publicKey === null || secret === null) return
+													clickReveal(vkeys, secret, publicKey, message)
+												}}
 											/>
 										)}
 									</Menu.Item>
@@ -298,7 +368,10 @@ export default function Messages({
 												}`}
 												type="button"
 												value="Deny"
-												onClick={(e) => clickDeny(secret, publicKey, message)}
+												onClick={(e) => {
+													if (publicKey === null || secret === null) return
+													clickDeny(vkeys, secret, publicKey, message)
+												}}
 											/>
 										)}
 									</Menu.Item>
@@ -348,16 +421,13 @@ export default function Messages({
 								{message.reveal ? (
 									<UserIcon
 										key={message.reveal.userPublicKey}
-										url={lookupTwitterProfileImage(
-											message.reveal.userPublicKey,
-											users
-										)}
+										url={message.reveal.userTwitterProfileImage}
 									/>
 								) : (
 									message.group.map((u) => (
 										<UserIcon
 											key={u}
-											url={lookupTwitterProfileImage(u, users)}
+											url={lookupTwitterProfileImage(u, users) || ""}
 										/>
 									))
 								)}

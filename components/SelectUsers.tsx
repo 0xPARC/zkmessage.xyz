@@ -4,7 +4,7 @@ import type { User } from "utils/types"
 import { UserIcon } from "components/UserIcon"
 
 interface SelectUsersProps {
-	publicKey: string
+	publicKey: string | null
 	users: User[]
 	updateSelectedUsers: (selectedUsers: string[]) => void
 }

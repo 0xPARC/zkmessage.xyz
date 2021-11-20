@@ -6,7 +6,7 @@ import { prisma } from "utils/prisma"
 import { LOCAL_STORAGE_SECRET_KEY } from "utils/localStorage"
 import { Header } from "components/Header"
 
-import type { User, Message } from "utils/types"
+import type { User, Message, VKeys } from "utils/types"
 
 import Messages from "components/Messages"
 import { SelectUsers } from "components/SelectUsers"
@@ -16,11 +16,7 @@ import { AppContext } from "utils/context"
 interface IndexPageProps {
 	users: User[]
 	initialMessages: Message[]
-	vkeys: {
-		sign: any
-		reveal: any
-		deny: any
-	}
+	vkeys: VKeys
 }
 
 export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
@@ -48,7 +44,9 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 						id: true,
 						// createdAt: true,
 						serializedProof: true,
+						serializedPublicSignals: true,
 						userPublicKey: true,
+						user: { select: { twitterProfileImage: true } },
 					},
 				},
 				deny: {
@@ -56,7 +54,9 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 						id: true,
 						// createdAt: true,
 						serializedProof: true,
+						serializedPublicSignals: true,
 						userPublicKey: true,
+						user: { select: { twitterProfileImage: true } },
 					},
 				},
 			},
@@ -76,12 +76,18 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 					proof: JSON.parse(message.serializedProof),
 					publicSignals: JSON.parse(message.serializedPublicSignals),
 					reveal: message.reveal && {
-						...message.reveal,
+						id: message.reveal.id,
+						userPublicKey: message.reveal.userPublicKey,
 						proof: JSON.parse(message.reveal.serializedProof),
+						publicSignals: JSON.parse(message.reveal.serializedPublicSignals),
+						userTwitterProfileImage: message.reveal.user.twitterProfileImage,
 					},
 					deny: message.deny.map((deny) => ({
-						...deny,
+						id: deny.id,
+						userPublicKey: deny.userPublicKey,
 						proof: JSON.parse(deny.serializedProof),
+						publicSignals: JSON.parse(deny.serializedPublicSignals),
+						userTwitterProfileImage: deny.user.twitterProfileImage,
 					})),
 				})),
 			},

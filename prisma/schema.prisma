@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -34,21 +34,23 @@ model Message {
 }
 
 model Reveal {
-  id              String   @id @default(uuid())
-  createdAt       DateTime @default(now()) @map(name: "created_at")
-  serializedProof String
-  userPublicKey   String
-  user            User     @relation(fields: [userPublicKey], references: [publicKey])
-  messageId       String   @unique
-  message         Message  @relation(fields: [messageId], references: [id])
+  id                      String   @id @default(uuid())
+  createdAt               DateTime @default(now()) @map(name: "created_at")
+  serializedProof         String
+  serializedPublicSignals String
+  userPublicKey           String
+  user                    User     @relation(fields: [userPublicKey], references: [publicKey])
+  messageId               String   @unique
+  message                 Message  @relation(fields: [messageId], references: [id])
 }
 
 model Deny {
-  id              String   @id @default(uuid())
-  createdAt       DateTime @default(now()) @map(name: "created_at")
-  serializedProof String
-  userPublicKey   String
-  user            User     @relation(fields: [userPublicKey], references: [publicKey])
-  messageId       String
-  message         Message  @relation(fields: [messageId], references: [id])
+  id                      String   @id @default(uuid())
+  createdAt               DateTime @default(now()) @map(name: "created_at")
+  serializedProof         String
+  serializedPublicSignals String
+  userPublicKey           String
+  user                    User     @relation(fields: [userPublicKey], references: [publicKey])
+  messageId               String
+  message                 Message  @relation(fields: [messageId], references: [id])
 }
