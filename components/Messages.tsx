@@ -95,10 +95,13 @@ async function clickSendMessage(
 	console.log("Verification is: ", verified)
 	if (verified) {
 		const {
-			body: { id },
+			headers: { etag },
 		} = await api.post("/api/messages", {
 			params: {},
-			headers: { "content-type": "application/json" },
+			headers: {
+				"content-type": "application/json",
+				accept: "application/json",
+			},
 			body: {
 				group: hashes,
 				msgBody: messageBody,
@@ -107,7 +110,8 @@ async function clickSendMessage(
 				msgAttestation: publicSignals[0],
 			},
 		})
-		return { id, proof, publicSignals, attestation: publicSignals[0] }
+
+		return { id: etag, proof, publicSignals, attestation: publicSignals[0] }
 	} else {
 		alert("We could not verify your message!")
 		throw new Error("We could not verify your message!")

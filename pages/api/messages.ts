@@ -7,6 +7,7 @@ import { prisma } from "utils/prisma"
 
 const postRequestHeaders = t.type({
 	"content-type": t.literal("application/json"),
+	accept: t.literal("application/json"),
 })
 
 const postRequestBody = t.type({
@@ -19,8 +20,8 @@ const postRequestBody = t.type({
 
 type PostRequestHeaders = t.TypeOf<typeof postRequestHeaders>
 type PostRequestBody = t.TypeOf<typeof postRequestBody>
-type PostResponseHeaders = { location: string }
-type PostResponseBody = { id: string }
+type PostResponseHeaders = { etag: string }
+type PostResponseBody = void
 
 const getRequestHeaders = t.type({ accept: t.literal("application/json") })
 const getRequestBody = t.void
@@ -84,8 +85,8 @@ export default makeHandler("/api/messages", {
 			})
 
 			return {
-				headers: { location: `/m/${id}` },
-				body: { id },
+				headers: { etag: id },
+				body: undefined,
 			}
 		},
 	},
