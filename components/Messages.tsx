@@ -10,9 +10,13 @@ import { AppContext } from "utils/context"
 
 function lookupTwitterProfileImage(
 	publicKey: string | null,
-	users: User[]
+	userMap: Record<string, User>
 ): string | undefined {
-	return users.find((u) => u.publicKey === publicKey)?.twitterProfileImage
+	if (publicKey !== null && publicKey in userMap) {
+		userMap[publicKey].twitterProfileImage
+	} else {
+		return undefined
+	}
 }
 
 async function clickReveal(
@@ -208,12 +212,8 @@ interface MessagesProps {
 	publicKey: string | null
 	secret: string | null
 	initialMessages: Message[]
-	selectedUsers: {
-		publicKey: string
-		twitterHandle: string
-		verificationTweetId: string
-	}[]
-	users: User[]
+	selectedUsers: string[]
+	userMap: Record<string, User>
 }
 
 function VerifyButton({ vKeys, message }: { vKeys: any; message: Message }) {
@@ -245,7 +245,7 @@ export default function Messages({
 	secret,
 	initialMessages,
 	selectedUsers,
-	users,
+	userMap,
 }: MessagesProps) {
 	const [newMessage, setNewMessage] = useState("")
 
@@ -253,42 +253,7 @@ export default function Messages({
 
 	const { vkeys } = useContext(AppContext)
 
-	const handleSubmit = useCallback(async () => {
-		if (secret === null) {
-			return
-		}
-
-		const publicKeys = selectedUsers
-			.map((user) => user.publicKey)
-			.filter((h) => h !== publicKey)
-
-		if (publicKey !== null) {
-			publicKeys.push(publicKey)
-		}
-
-		publicKeys.sort((a, b) => a.localeCompare(b))
-
-		const { id, proof, publicSignals, attestation } = await clickSendMessage(
-			vkeys,
-			secret,
-			publicKeys,
-			newMessage
-		)
-
-		const message: Message = {
-			id,
-			group: publicKeys,
-			msgBody: newMessage,
-			proof: proof,
-			publicSignals: publicSignals,
-			msgAttestation: attestation,
-			reveal: null,
-			deny: [],
-		}
-
-		setNewMessage("")
-		setMessages([message].concat(messages))
-	}, [secret])
+	const disabled = secret === null || userMap[secret] === undefined
 
 	return (
 		<>
@@ -300,28 +265,29 @@ export default function Messages({
 					}}
 				>
 					<input
-						disabled={!secret}
+						disabled={disabled}
 						type="text"
 						className={`rounded-xl px-4 py-3 mr-3 flex-1 !font-monospace outline-none bg-white ${
-							secret ? "" : "placeholder-light"
+							disabled ? "placeholder-light" : ""
 						}`}
 						placeholder={
-							secret ? "Type your message here" : "Login to send a message"
+							disabled ? "Login to send a message" : "Type your message here"
 						}
 						value={newMessage}
 						onChange={(e) => setNewMessage(e.target.value)}
 					/>
 					<input
-						disabled={!secret}
+						disabled={disabled}
 						className={`text-white rounded-xl px-4 pt-2 pb-1 ${
-							secret ? "cursor-pointer bg-pink hover:bg-midpink" : "bg-gray-200"
+							disabled
+								? "bg-gray-200"
+								: "cursor-pointer bg-pink hover:bg-midpink"
 						}`}
 						type="submit"
 						value="Post"
 						onClick={async (e) => {
 							if (publicKey === null || secret === null) return
-							const hashes = (selectedUsers || [])
-								.map((user) => user.publicKey)
+							const hashes = selectedUsers
 								.filter((h) => h !== publicKey)
 								.concat([publicKey])
 							hashes.sort((a, b) => a.localeCompare(b))
@@ -449,7 +415,7 @@ export default function Messages({
 									message.group.map((u, index) => (
 										<UserIcon
 											key={index}
-											url={lookupTwitterProfileImage(u, users)!}
+											url={lookupTwitterProfileImage(u, userMap)!}
 										/>
 									))
 								)}
@@ -460,7 +426,7 @@ export default function Messages({
 							{message.deny?.map((d, index) => (
 								<UserIcon
 									key={index}
-									url={lookupTwitterProfileImage(d.userPublicKey, users)!}
+									url={lookupTwitterProfileImage(d.userPublicKey, userMap)!}
 								/>
 							))}
 						</div>

@@ -132,10 +132,8 @@ export default function IndexPage({
 							publicKey={publicKey}
 							secret={secret}
 							initialMessages={initialMessages}
-							selectedUsers={selectedUsers.map(
-								(publicKey) => userMap[publicKey]
-							)}
-							users={users}
+							selectedUsers={selectedUsers}
+							userMap={userMap}
 						/>
 					</div>
 					<div className="col-span-1">
