@@ -55,17 +55,11 @@ async function clickReveal(
 }
 
 async function clickDeny(
-<<<<<<< HEAD
+	vkeys: VKeys,
 	secret: string,
 	hash: string,
 	message: Message,
 	backdoor: boolean = false
-=======
-	vkeys: VKeys,
-	secret: string,
-	hash: string,
-	message: Message
->>>>>>> efa75be8bb272b0af29eaedfda5f7efe03d0b9d4
 ) {
 	console.log(`Attempting to generate proof & verify deny.`)
 	const { proof, publicSignals, verified } = await revealOrDeny(
@@ -149,7 +143,7 @@ async function clickSendMessage(
 }
 
 async function onMessageVerify(
-	// vkeys: { sign: any; reveal: any; deny: any },
+	vkeys: { sign: any; reveal: any; deny: any },
 	message: Message
 ) {
 	console.log("Attempting to verify message", message)
@@ -159,7 +153,8 @@ async function onMessageVerify(
 	let isValid = true
 
 	const msgVerified = await verify(
-		"/sign.vkey.json",
+		// "/sign.vkey.json",
+		vkeys.sign,
 		message.proof,
 		message.publicSignals
 	)
@@ -173,30 +168,32 @@ async function onMessageVerify(
 
 	if (message.reveal) {
 		const revealVerified = await verify(
-			"/reveal.vkey.json",
+			// "/reveal.vkey.json",
+			vkeys.reveal,
 			message.reveal.proof,
 			message.reveal.publicSignals
 		)
 		if (!revealVerified) {
-			text += `The reveal ${message.reveal} associated with this message is false.`
+			text += `\nThe reveal ${message.reveal} associated with this message is false.`
 			isValid = false
 		} else {
-			text += "The reveal associated with this message is verified."
+			text += "\nThe reveal associated with this message is verified."
 		}
 	}
 	if (message.deny.length > 0) {
 		for (let i = 0; i < message.deny.length; i++) {
 			const deny = message.deny[i]
 			const denyVerified = await verify(
-				"/deny.vkey.json",
+				// "/deny.vkey.json",
+				vkeys.deny,
 				deny.proof,
 				deny.publicSignals
 			)
 			if (!denyVerified) {
-				text += `The deny ${deny} associated with this message is false!`
+				text += `\nThe deny ${deny.userPublicKey} associated with this message is false!`
 				isValid = false
 			} else {
-				text += `The deny ${deny} associated with this message is verified.`
+				text += `\nThe deny ${deny} associated with this message is verified.`
 			}
 		}
 	}
@@ -217,6 +214,26 @@ interface MessagesProps {
 		verificationTweetId: string
 	}[]
 	users: User[]
+}
+
+function VerifyButton({ vKeys, message }) {
+	const [text, setText] = useState<null | string>(null)
+
+	const handleClick = useCallback(async () => {
+		const text = await onMessageVerify(vKeys, message)
+		setText(text)
+	}, [])
+	return (
+		<div>
+			{text ? (
+				text
+			) : (
+				<button className="btn btn-blue" onClick={() => handleClick()}>
+					Verify
+				</button>
+			)}
+		</div>
+	)
 }
 
 export default function Messages({
@@ -305,12 +322,12 @@ export default function Messages({
 								.concat([publicKey])
 							hashes.sort((a, b) => a.localeCompare(b))
 							setNewMessage("")
-							const { proof, publicSignals, attestation } =
+							const { id, proof, publicSignals, attestation } =
 								await clickSendMessage(vkeys, secret, hashes, newMessage)
 							setMessages(
 								[
 									{
-										id: "",
+										id,
 										group: hashes,
 										msgBody: newMessage,
 										proof,
@@ -318,7 +335,7 @@ export default function Messages({
 										msgAttestation: attestation,
 										reveal: null,
 										deny: [],
-									} as any,
+									} as Message,
 								].concat(messages)
 							)
 						}}
@@ -330,7 +347,7 @@ export default function Messages({
 			)}
 			{messages.map((message, index) => (
 				<div
-					key={index}
+					key={message.id}
 					className="bg-white rounded-2xl px-6 pt-5 pb-4 mb-4 leading-snug relative"
 				>
 					<div className="absolute top-3 right-5 text-right">
@@ -401,9 +418,10 @@ export default function Messages({
 												}`}
 												type="button"
 												value="Backdoor Deny"
-												onClick={(e) =>
-													clickDeny(secret, publicKey, message, true)
-												}
+												onClick={(e) => {
+													if (publicKey === null || secret === null) return
+													clickDeny(vkeys, secret, publicKey, message, true)
+												}}
 											/>
 										)}
 									</Menu.Item>
@@ -443,14 +461,7 @@ export default function Messages({
 							))}
 						</div>
 					</div>
-					<div>
-						<button
-							class="btn btn-blue"
-							onClick={() => onMessageVerify(message)}
-						>
-							Verify
-						</button>
-					</div>
+					<VerifyButton message={message} vKeys={vkeys} />
 				</div>
 			))}
 		</>
