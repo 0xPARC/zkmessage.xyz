@@ -55,14 +55,15 @@ export async function prove(
 	return { proof, publicSignals, verified }
 }
 
-// export async function verify(
-// 	vkeyPath: any,
-// 	{ proof, publicSignals }: Proof
-// ): Promise<boolean> {
-// 	const loadedVKey = await fetch(vkeyPath).then(res => res.json());
-// 	const res = await snarkjs.groth16.verify(loadedVKey, publicSignals, proof);
-// 	return res
-// }
+export async function verify(
+	vkeyPath: any,
+	proof: any,
+	publicSignals: any
+): Promise<boolean> {
+	const loadedVKey = await fetch(vkeyPath).then((res) => res.json())
+	const res = await snarkjs.groth16.verify(loadedVKey, publicSignals, proof)
+	return res
+}
 
 export async function revealOrDeny(
 	reveal: boolean,
@@ -72,16 +73,16 @@ export async function revealOrDeny(
 	msgAttestation: string
 ): Promise<ProofAndVerification> {
 	const revealOrDenyStr = reveal ? "reveal" : "deny"
-	secret = BigInt("0x" + secret);
-	hash = BigInt("0x" + hash);
+	secret = BigInt("0x" + secret)
+	hash = BigInt("0x" + hash)
 
-	console.log("In reveal");
-	console.log(secret);
-	console.log(hash);
+	console.log("In reveal")
+	console.log(secret)
+	console.log(hash)
 	console.log(msg)
-	console.log(msgAttestation);
+	console.log(msgAttestation)
 
-	const msgHex = plaintextToHex(msg);
+	const msgHex = plaintextToHex(msg)
 
 	const { proof, publicSignals } = await snarkjs.groth16.fullProve(
 		{ secret: secret, hash: hash, msg: msgHex, msgAttestation: msgAttestation },

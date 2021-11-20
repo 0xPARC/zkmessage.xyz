@@ -5,7 +5,7 @@ import api from "next-rest/client"
 import { UserIcon } from "components/UserIcon"
 
 import type { Message } from "utils/types"
-import { prove, revealOrDeny } from "utils/prove"
+import { prove, revealOrDeny, verify } from "utils/prove"
 
 function lookupTwitterProfileImage(publicKey: string, users: User) {
 	return users.find((u) => u.publicKey === publicKey)?.twitterProfileImage
@@ -56,15 +56,15 @@ async function clickDeny(secret: string, hash: string, message: Message) {
 		// Send the proof to the DB & store it. Update the lists of users on the deny side.
 		// Make sure page gets refreshed.
 		alert("Valid deny!")
-		// api.post("/api/reveal", {
-		// 	params: {},
-		// 	headers: { "content-type": "application/json" },
-		// 	body: {
-		// 		userPublicKey: hash,
-		// 		messageId: message.id,
-		// 		proof: proof,
-		// 	},
-		// })
+		api.post("/api/deny", {
+			params: {},
+			headers: { "content-type": "application/json" },
+			body: {
+				userPublicKey: hash,
+				messageId: message.id,
+				proof: proof,
+			},
+		})
 	} else {
 		alert("You cannot deny this message! Perhaps you wrote it? :) Oops...")
 	}
@@ -106,6 +106,48 @@ async function clickSendMessage(
 		alert("We could not verify your message!")
 		throw new Error("We could not verify your message!")
 	}
+}
+
+async function onMessageVerify(message: Message) {
+	console.log("Attempting to verify message", message)
+	//verifying the message itself
+	const msgVerified = verify(
+		"/sign.vkey.json",
+		message.publicSignals,
+		message.proof
+	)
+	if (!msgVerified) {
+		alert(
+			`The message with these public signals ${message.publicSignals} seems to be false!`
+		)
+		// if the message is false just go ahead and return false, no
+		// point alerting about the other stuff
+		return false
+	}
+
+	let isValid = true
+	if (message.reveal) {
+		const revealVerified = verify("/reveal.vkey.json", message.reveal.proof, {})
+		if (!revealVerified) {
+			alert(
+				`The reveal associated with this message ${message.publicSignals} seems to be false!`
+			)
+			isValid = false
+		}
+	}
+	if (message.deny.length > 0) {
+		const denyVerifies = message.deny.map((deny) => {
+			const denyVerified = verify("/deny.vkey.json", deny.proof, {})
+			if (!denyVerified) {
+				alert(
+					`The deny ${deny} associated with this message ${message.publicSignals} seems to be false!`
+				)
+				isValid = false
+			}
+		})
+	}
+
+	return isValid
 }
 
 const HASH_ARR_SIZE = 40
