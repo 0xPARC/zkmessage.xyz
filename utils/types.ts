@@ -9,12 +9,14 @@ export type Message = {
 	reveal: {
 		id: string
 		proof: unknown
+		publicSignals: string[]
 		userPublicKey: string
 		userTwitterProfileImage: string
 	} | null
 	deny: {
 		id: string
 		proof: unknown
+		publicSignals: string[]
 		userPublicKey: string
 		userTwitterProfileImage: string
 	}[]
