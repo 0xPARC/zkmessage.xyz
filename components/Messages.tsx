@@ -216,13 +216,14 @@ interface MessagesProps {
 	users: User[]
 }
 
-function VerifyButton({ vKeys, message }) {
+function VerifyButton({ vKeys, message }: { vKeys: any; message: Message }) {
 	const [text, setText] = useState<null | string>(null)
 
 	const handleClick = useCallback(async () => {
 		const text = await onMessageVerify(vKeys, message)
 		setText(text)
 	}, [])
+
 	return (
 		<div>
 			{text ? (
@@ -442,13 +443,13 @@ export default function Messages({
 								{message.reveal ? (
 									<UserIcon
 										key={message.reveal.userPublicKey}
-										url={message.reveal.userTwitterProfileImage}
+										url={message.reveal.userTwitterProfileImage!}
 									/>
 								) : (
 									message.group.map((u) => (
 										<UserIcon
 											key={u}
-											url={lookupTwitterProfileImage(u, users) || ""}
+											url={lookupTwitterProfileImage(u, users)!}
 										/>
 									))
 								)}
@@ -459,7 +460,7 @@ export default function Messages({
 							{message.deny?.map((d) => (
 								<UserIcon
 									key={d.userPublicKey}
-									url={lookupTwitterProfileImage(d.userPublicKey, users)}
+									url={lookupTwitterProfileImage(d.userPublicKey, users)!}
 								/>
 							))}
 						</div>
