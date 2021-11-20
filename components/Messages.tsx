@@ -32,7 +32,7 @@ async function clickReveal(secret: string, hash: string, message: Message) {
 		// Send the proof to the DB & store it. Update the lists of users on the deny side.
 		// Make sure page gets refreshed.
 		alert("Valid reveal!")
-		api.post("/api/reveal", {
+		await api.post("/api/reveal", {
 			params: {},
 			headers: { "content-type": "application/json" },
 			body: {
@@ -59,7 +59,7 @@ async function clickDeny(secret: string, hash: string, message: Message) {
 		// Send the proof to the DB & store it. Update the lists of users on the deny side.
 		// Make sure page gets refreshed.
 		alert("Valid deny!")
-		api.post("/api/deny", {
+		await api.post("/api/deny", {
 			params: {},
 			headers: { "content-type": "application/json" },
 			body: {
@@ -121,11 +121,12 @@ async function clickSendMessage(
 async function onMessageVerify(message: Message) {
 	console.log("Attempting to verify message", message)
 	//verifying the message itself
-	const msgVerified = verify(
+	const msgVerified = await verify(
 		"/sign.vkey.json",
 		message.publicSignals,
 		message.proof
 	)
+
 	if (!msgVerified) {
 		alert(
 			`The message with these public signals ${message.publicSignals} seems to be false!`
@@ -137,7 +138,11 @@ async function onMessageVerify(message: Message) {
 
 	let isValid = true
 	if (message.reveal) {
-		const revealVerified = verify("/reveal.vkey.json", message.reveal.proof, {})
+		const revealVerified = await verify(
+			"/reveal.vkey.json",
+			message.reveal.proof,
+			{}
+		)
 		if (!revealVerified) {
 			alert(
 				`The reveal associated with this message ${message.publicSignals} seems to be false!`
@@ -146,15 +151,17 @@ async function onMessageVerify(message: Message) {
 		}
 	}
 	if (message.deny.length > 0) {
-		const denyVerifies = message.deny.map((deny) => {
-			const denyVerified = verify("/deny.vkey.json", deny.proof, {})
-			if (!denyVerified) {
-				alert(
-					`The deny ${deny} associated with this message ${message.publicSignals} seems to be false!`
-				)
-				isValid = false
-			}
-		})
+		await Promise.all(
+			message.deny.map(async (deny) => {
+				const denyVerified = await verify("/deny.vkey.json", deny.proof, {})
+				if (!denyVerified) {
+					alert(
+						`The deny ${deny} associated with this message ${message.publicSignals} seems to be false!`
+					)
+					isValid = false
+				}
+			})
+		)
 	}
 
 	return isValid
