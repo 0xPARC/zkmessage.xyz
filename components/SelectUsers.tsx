@@ -21,7 +21,7 @@ export function SelectUsers({
 			{users.length === 0 && (
 				<div className="text-gray-400">No registered users</div>
 			)}
-			<div className="">
+			{publicKey && (
 				<input
 					type="button"
 					value={
@@ -44,7 +44,7 @@ export function SelectUsers({
 						}
 					}}
 				/>
-			</div>
+			)}
 			{users.map((user) => (
 				<div
 					key={user.publicKey}
