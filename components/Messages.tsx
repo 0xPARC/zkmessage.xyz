@@ -1,6 +1,7 @@
 import { useState, useCallback, useContext, useEffect } from "react"
 import { Menu, Transition } from "@headlessui/react"
 import api from "next-rest/client"
+import moment from "moment"
 
 import { UserIcon } from "components/UserIcon"
 
@@ -289,6 +290,7 @@ export default function Messages({
 
 		const message: Message = {
 			id,
+			createdAt: +new Date(),
 			group: publicKeys,
 			msgBody: newMessage,
 			proof: proof,
@@ -346,6 +348,7 @@ export default function Messages({
 								[
 									{
 										id,
+										createdAt: +new Date(),
 										group: hashes,
 										msgBody: newMessage,
 										proof,
@@ -479,7 +482,12 @@ export default function Messages({
 							))}
 						</div>
 					</div>
-					<VerifyButton message={message} vKeys={vkeys} />
+					<div className="flex">
+						<VerifyButton message={message} vKeys={vkeys} />
+						<div className="flex-1 text-right text-sm text-gray-400 mt-3">
+							{moment(message.createdAt).fromNow()}
+						</div>
+					</div>
 				</div>
 			))}
 		</>

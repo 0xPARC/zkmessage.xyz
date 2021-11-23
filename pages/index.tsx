@@ -35,7 +35,7 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 			select: {
 				id: true,
 				msgBody: true,
-				// createdAt: true,
+				createdAt: true,
 				serializedProof: true,
 				serializedPublicSignals: true,
 				msgAttestation: true,
@@ -43,7 +43,7 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 				reveal: {
 					select: {
 						id: true,
-						// createdAt: true,
+						createdAt: true,
 						serializedProof: true,
 						serializedPublicSignals: true,
 						userPublicKey: true,
@@ -53,7 +53,7 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 				deny: {
 					select: {
 						id: true,
-						// createdAt: true,
+						createdAt: true,
 						serializedProof: true,
 						serializedPublicSignals: true,
 						userPublicKey: true,
@@ -72,12 +72,14 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 				initialMessages: messages.map((message) => ({
 					group: message.group.map((user) => user.publicKey),
 					id: message.id,
+					createdAt: +message.createdAt,
 					msgBody: message.msgBody,
 					msgAttestation: message.msgAttestation,
 					proof: JSON.parse(message.serializedProof),
 					publicSignals: JSON.parse(message.serializedPublicSignals),
 					reveal: message.reveal && {
 						id: message.reveal.id,
+						createdAt: +message.reveal.createdAt,
 						userPublicKey: message.reveal.userPublicKey,
 						proof: JSON.parse(message.reveal.serializedProof),
 						publicSignals: JSON.parse(message.reveal.serializedPublicSignals),
@@ -85,6 +87,7 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 					},
 					deny: message.deny.map((deny) => ({
 						id: deny.id,
+						createdAt: +deny.createdAt,
 						userPublicKey: deny.userPublicKey,
 						proof: JSON.parse(deny.serializedProof),
 						publicSignals: JSON.parse(deny.serializedPublicSignals),

@@ -1,6 +1,6 @@
 export type Message = {
 	id: string
-	// createdAt: string
+	createdAt: number
 	group: string[]
 	msgBody: string
 	proof: unknown
@@ -8,6 +8,7 @@ export type Message = {
 	msgAttestation: string
 	reveal: {
 		id: string
+		createdAt: number
 		proof: unknown
 		publicSignals: string[]
 		userPublicKey: string
@@ -15,6 +16,7 @@ export type Message = {
 	} | null
 	deny: {
 		id: string
+		createdAt: number
 		proof: unknown
 		publicSignals: string[]
 		userPublicKey: string
