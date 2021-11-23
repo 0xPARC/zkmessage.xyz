@@ -21,6 +21,30 @@ export function SelectUsers({
 			{users.length === 0 && (
 				<div className="text-gray-400">No registered users</div>
 			)}
+			<div className="">
+				<input
+					type="button"
+					value={
+						selectedUsers.length === users.length - 1
+							? "Deselect all"
+							: "Select all"
+					}
+					className="block w-full cursor-pointer bg-gray-300 text-gray-800 rounded-xl px-4 pt-2 pb-1 mb-4"
+					onClick={() => {
+						if (selectedUsers.length === users.length - 1) {
+							setSelectedUsers([])
+							updateSelectedUsers([])
+						} else {
+							setSelectedUsers(
+								users.map((u) => u.publicKey).filter((h) => h !== publicKey)
+							)
+							updateSelectedUsers(
+								users.map((u) => u.publicKey).filter((h) => h !== publicKey)
+							)
+						}
+					}}
+				/>
+			</div>
 			{users.map((user) => (
 				<div
 					key={user.publicKey}
