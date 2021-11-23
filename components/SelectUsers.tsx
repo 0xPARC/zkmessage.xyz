@@ -25,13 +25,13 @@ export function SelectUsers({
 				<input
 					type="button"
 					value={
-						selectedUsers.length === users.length - 1
+						selectedUsers.length >= users.length - 1
 							? "Deselect all"
 							: "Select all"
 					}
 					className="block w-full cursor-pointer bg-gray-300 text-gray-800 rounded-xl px-4 pt-2 pb-1 mb-4"
 					onClick={() => {
-						if (selectedUsers.length === users.length - 1) {
+						if (selectedUsers.length >= users.length - 1) {
 							setSelectedUsers([])
 							updateSelectedUsers([])
 						} else {
