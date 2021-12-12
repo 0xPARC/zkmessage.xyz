@@ -11,46 +11,35 @@ datasource db {
 }
 
 model User {
-  publicKey           String    @id
-  twitterId           String    @unique
-  twitterHandle       String    @unique
+  publicKey           String   @id
+  twitterId           String   @unique
+  twitterHandle       String   @unique
   twitterProfileImage String
-  verificationTweetId String    @unique
-  group               Message[] @relation("group")
-  reveals             Reveal[]
-  denys               Deny[]
+  verificationTweetId String
+  threads             Thread[] @relation("group")
+}
+
+model Thread {
+  id            String    @id @default(uuid())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
+  group         User[]    @relation(name: "group")
+  messages      Message[]
+  lastMessageId String?   @unique
+  lastMessage   Message?  @relation(name: "last_message", fields: [lastMessageId], references: [id])
 }
 
 model Message {
-  id                      String   @id @default(uuid())
-  createdAt               DateTime @default(now()) @map(name: "created_at")
-  group                   User[]   @relation(name: "group")
-  msgBody                 String
-  serializedProof         String
-  serializedPublicSignals String
-  msgAttestation          String
-  reveal                  Reveal?
-  deny                    Deny[]
-}
-
-model Reveal {
-  id                      String   @id @default(uuid())
-  createdAt               DateTime @default(now()) @map(name: "created_at")
-  serializedProof         String
-  serializedPublicSignals String
-  userPublicKey           String
-  user                    User     @relation(fields: [userPublicKey], references: [publicKey])
-  messageId               String   @unique
-  message                 Message  @relation(fields: [messageId], references: [id])
-}
-
-model Deny {
-  id                      String   @id @default(uuid())
-  createdAt               DateTime @default(now()) @map(name: "created_at")
-  serializedProof         String
-  serializedPublicSignals String
-  userPublicKey           String
-  user                    User     @relation(fields: [userPublicKey], references: [publicKey])
-  messageId               String
-  message                 Message  @relation(fields: [messageId], references: [id])
+  id              String    @id @default(uuid())
+  createdAt       DateTime  @default(now()) @map(name: "created_at")
+  threadId        String
+  thread          Thread    @relation(fields: [threadId], references: [id])
+  isLastMessageOf Thread?   @relation(name: "last_message")
+  parentId        String?
+  parent          Message?  @relation(name: "parent", fields: [parentId], references: [id])
+  replies         Message[] @relation(name: "parent")
+  body            String
+  hash            String
+  proof           Json
+  publicSignals   Json
 }
