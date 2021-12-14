@@ -5,8 +5,6 @@ import { useRouter } from "next/router"
 
 import nookies from "nookies"
 
-import api from "next-rest/client"
-
 import { PageProps } from "utils/types"
 import { PageContext } from "utils/context"
 import { getTextFromPublicKey } from "utils/verification"

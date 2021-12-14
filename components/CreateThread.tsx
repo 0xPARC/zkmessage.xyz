@@ -2,8 +2,6 @@ import React, { useCallback, useContext, useEffect, useState } from "react"
 
 import { useRouter } from "next/router"
 
-import api from "next-rest/client"
-
 import { SelectGroup } from "./SelectGroup"
 
 import { hashMessage } from "utils/mimc"
