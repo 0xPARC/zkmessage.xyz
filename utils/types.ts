@@ -1,38 +1,51 @@
-export type Message = {
-	id: string
-	createdAt: number
-	group: string[]
-	msgBody: string
-	proof: unknown
-	publicSignals: string[]
-	msgAttestation: string
-	reveal: {
-		id: string
-		createdAt: number
-		proof: unknown
-		publicSignals: string[]
-		userPublicKey: string
-		userTwitterProfileImage: string
-	} | null
-	deny: {
-		id: string
-		createdAt: number
-		proof: unknown
-		publicSignals: string[]
-		userPublicKey: string
-		userTwitterProfileImage: string
-	}[]
+export interface PageProps {
+	user: User | null
 }
 
-export type User = {
+export interface User {
 	publicKey: string
 	twitterHandle: string
 	verificationTweetId: string
 	twitterProfileImage: string
 }
 
-export type VKeys = {
-	sign: any
-	reveal: any
-	deny: any
+export const userProps = {
+	publicKey: true,
+	twitterHandle: true,
+	verificationTweetId: true,
+	twitterProfileImage: true,
+}
+
+export interface Thread {
+	id: string
+	createdAt: string
+	updatedAt: string
+}
+
+export const threadProps = {
+	id: true,
+	createdAt: true,
+	updatedAt: true,
+}
+
+export interface Message {
+	id: string
+	createdAt: string
+	body: string
+	hash: string
+	proof: {}
+	publicSignals: string[]
+}
+
+export const messageProps = {
+	id: true,
+	createdAt: true,
+	body: true,
+	hash: true,
+	proof: true,
+	publicSignals: true,
+}
+
+export interface VKeys {
+	sign: {}
 }

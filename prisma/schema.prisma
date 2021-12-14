@@ -21,26 +21,29 @@ model User {
 }
 
 model Thread {
-  id            String    @id @default(uuid())
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @default(now()) @updatedAt
-  group         User[]    @relation(name: "group")
-  messages      Message[]
-  lastMessageId String?   @unique
-  lastMessage   Message?  @relation(name: "last_message", fields: [lastMessageId], references: [id])
+  id             String    @id @default(uuid())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now()) @updatedAt
+  group          User[]    @relation(name: "group")
+  messages       Message[]
+  firstMessageId String?   @unique
+  firstMessage   Message?  @relation(name: "first_message", fields: [firstMessageId], references: [id])
+  lastMessageId  String?   @unique
+  lastMessage    Message?  @relation(name: "last_message", fields: [lastMessageId], references: [id])
 }
 
 model Message {
-  id              String    @id @default(uuid())
-  createdAt       DateTime  @default(now()) @map(name: "created_at")
-  threadId        String
-  thread          Thread    @relation(fields: [threadId], references: [id])
-  isLastMessageOf Thread?   @relation(name: "last_message")
-  parentId        String?
-  parent          Message?  @relation(name: "parent", fields: [parentId], references: [id])
-  replies         Message[] @relation(name: "parent")
-  body            String
-  hash            String
-  proof           Json
-  publicSignals   Json
+  id               String    @id @default(uuid())
+  createdAt        DateTime  @default(now()) @map(name: "created_at")
+  threadId         String
+  thread           Thread    @relation(fields: [threadId], references: [id])
+  isFirstMessageOf Thread?   @relation(name: "first_message")
+  isLastMessageOf  Thread?   @relation(name: "last_message")
+  parentId         String?
+  parent           Message?  @relation(name: "parent", fields: [parentId], references: [id])
+  replies          Message[] @relation(name: "parent")
+  body             String
+  hash             String
+  proof            Json
+  publicSignals    Json
 }

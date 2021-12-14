@@ -302,3 +302,24 @@ export const mimcWithRounds =
 		)[0]
 
 export const mimcHash = mimcWithRounds(220)
+
+/**
+ * derive a public key from a secret key
+ * @param secretKey a hex string
+ * @returns a hex string
+ */
+export function derivePublicKey(secretKey: string) {
+	const n = BigInt("0x" + secretKey)
+	return mimcHash(n).toString(16)
+}
+
+export function hashMessage(body: string): bigint {
+	const data = new TextEncoder().encode(body)
+	let n = 0n
+	for (let i = 0; i < data.length; i++) {
+		const v = BigInt(data[data.length - i - 1])
+		const p = 256n ** BigInt(i)
+		n += v * p
+	}
+	return mimcHash(n)
+}

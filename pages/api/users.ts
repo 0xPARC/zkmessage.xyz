@@ -1,40 +1,15 @@
+import { NextApiRequest, NextApiResponse } from "next"
+
+import nookies from "nookies"
+
 import * as t from "io-ts"
 
-import { makeHandler, ServerError } from "next-rest/server"
-import { prisma } from "utils/prisma"
-import { getTextFromPublicKey, zkChatTwitterHandle } from "utils/verification"
+import { prisma } from "utils/server/prisma"
+import { hexPattern } from "utils/hexPattern"
+import { userProps } from "utils/types"
+import { zkChatTwitterHandle } from "utils/verification"
 
-const postRequestHeaders = t.type({
-	"content-type": t.literal("application/json"),
-})
-
-const postRequestBody = t.type({
-	publicKey: t.string,
-})
-
-type PostRequestHeaders = t.TypeOf<typeof postRequestHeaders>
-type PostRequestBody = t.TypeOf<typeof postRequestBody>
-type PostResponseHeaders = {}
-type PostResponseBody = any
-
-declare module "next-rest" {
-	interface API {
-		"/api/users": Route<{
-			POST: {
-				request: {
-					headers: PostRequestHeaders
-					body: PostRequestBody
-				}
-				response: {
-					headers: PostResponseHeaders
-					body: PostResponseBody
-				}
-			}
-		}>
-	}
-}
-
-const twitterApiResponse = t.type({
+const twitterSearchResult = t.type({
 	meta: t.type({
 		newest_id: t.string,
 		oldest_id: t.string,
@@ -59,64 +34,62 @@ const twitterApiResponse = t.type({
 	),
 })
 
-export default makeHandler("/api/users", {
-	POST: {
-		headers: postRequestHeaders.is,
-		body: postRequestBody.is,
-		exec: async ({ body: { publicKey } }) => {
-			const query = encodeURIComponent(`@${zkChatTwitterHandle} "${publicKey}"`)
-			console.log(query)
-			const res = await fetch(
-				`https://api.twitter.com/2/tweets/search/recent?query=${query}&expansions=author_id&user.fields=username,profile_image_url`,
-				{
-					headers: {
-						Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
-					},
-				}
-			)
+export default async (req: NextApiRequest, res: NextApiResponse) => {
+	if (req.method !== "POST") {
+		return res.status(400).end()
+	}
 
-			if (res.status !== 200) {
-				throw new ServerError(res.status, res.statusText)
-			}
+	const { publicKey } = req.query
+	if (typeof publicKey !== "string" || !hexPattern.test(publicKey)) {
+		return res.status(400).end()
+	}
 
-			const data = await res.json()
+	const query = encodeURIComponent(`@${zkChatTwitterHandle} "${publicKey}"`)
+	const twitterApiResponse = await fetch(
+		`https://api.twitter.com/2/tweets/search/recent?query=${query}&expansions=author_id&user.fields=username,profile_image_url`,
+		{
+			headers: {
+				Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
+			},
+		}
+	)
 
-			console.log(data)
+	if (twitterApiResponse.status !== 200) {
+		return res.status(500).end()
+	}
 
-			if (!twitterApiResponse.is(data)) {
-				console.error(data)
-				throw new ServerError(500, "Unexpected Twitter API response")
-			}
+	const data = await twitterApiResponse.json()
+	if (!twitterSearchResult.is(data) || data.meta.result_count < 1) {
+		return res.status(500).end()
+	}
 
-			if (data.meta.result_count < 1) {
-				throw new ServerError(400, "No tweets matching the public key found")
-			}
+	const [{ id, author_id }] = data.data
 
-			const [{ id, author_id, text }] = data.data
+	const { username, profile_image_url } = data.includes.users.find(
+		(user) => user.id === author_id
+	)!
 
-			console.log(data.includes.users)
-
-			if (text !== getTextFromPublicKey(publicKey)) {
-				throw new ServerError(500, "Invalid tweet syntax")
-			}
-
-			const { username, profile_image_url } = data.includes.users.find(
-				(user) => user.id === author_id
-			)!
-
-			await prisma.user.create({
-				data: {
-					publicKey,
-					twitterId: author_id,
-					twitterHandle: username,
-					verificationTweetId: id,
-					twitterProfileImage: profile_image_url,
-				},
+	await prisma.user
+		.create({
+			data: {
+				publicKey,
+				twitterId: author_id,
+				twitterHandle: username,
+				verificationTweetId: id,
+				twitterProfileImage: profile_image_url,
+			},
+			select: userProps,
+		})
+		.then((user) => {
+			nookies.set({ res }, "publicKey", publicKey, {
+				maxAge: 30 * 24 * 60 * 60,
+				path: "/",
+				httpOnly: true,
 			})
-
-			console.log("returning")
-
-			return { headers: {}, body: undefined }
-		},
-	},
-})
+			res.status(200).json(user)
+		})
+		.catch((err) => {
+			console.error(err)
+			res.status(500).end()
+		})
+}
