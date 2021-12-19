@@ -31,6 +31,7 @@
 		"prisma": "^3.5.0",
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2",
+		"react-tooltip": "^4.2.21",
 		"snarkjs": "^0.4.10",
 		"uuid": "^8.3.2"
 	},

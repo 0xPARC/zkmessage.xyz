@@ -1,7 +1,9 @@
+import ReactTooltip from 'react-tooltip';
 import { useState, useCallback, useContext, useEffect } from "react"
 import { Menu, Transition } from "@headlessui/react"
 import api from "next-rest/client"
 import moment from "moment"
+
 
 import { UserIcon } from "components/UserIcon"
 
@@ -14,6 +16,13 @@ function lookupTwitterProfileImage(
 	users: User[]
 ): string | undefined {
 	return users.find((u) => u.publicKey === publicKey)?.twitterProfileImage
+}
+
+function lookupTwitterHandle(
+	publicKey: string | null,
+	users: User[]
+): string | undefined {
+	return users.find((u) => u.publicKey === publicKey)?.twitterHandle
 }
 
 async function clickReveal(
@@ -461,15 +470,18 @@ export default function Messages({
 									<UserIcon
 										key={message.reveal.userPublicKey}
 										url={message.reveal.userTwitterProfileImage!}
+										username={lookupTwitterHandle(message.reveal.userPublicKey, users)}
 									/>
 								) : (
 									message.group.map((u, index) => (
 										<UserIcon
 											key={index}
 											url={lookupTwitterProfileImage(u, users)!}
+											username={lookupTwitterHandle(u, users)!}
 										/>
 									))
 								)}
+								<ReactTooltip effect="solid" />
 							</div>
 						</div>
 						<div className="text-right text-gray-400">
@@ -478,8 +490,10 @@ export default function Messages({
 								<UserIcon
 									key={index}
 									url={lookupTwitterProfileImage(d.userPublicKey, users)!}
+									username={lookupTwitterHandle(d.userPublicKey, users)!}
 								/>
 							))}
+							<ReactTooltip effect="solid" />
 						</div>
 					</div>
 					<div className="flex">
