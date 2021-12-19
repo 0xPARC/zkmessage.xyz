@@ -3,6 +3,7 @@ import type { GetServerSideProps } from "next"
 
 import nookies from "nookies"
 import { PageProps, User, userProps } from "utils/types"
+import { prisma } from "utils/server/prisma"
 import { UserIcon } from "components/UserIcon"
 
 interface UsersPageProps extends PageProps {
