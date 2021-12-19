@@ -53,7 +53,7 @@ export async function verifyMessage(
 		return false
 	}
 
-	console.log("message hash is good.")
+	console.log("message hashes match!")
 	console.log("verifying message proof...")
 	const verified = await snarkjs.groth16.verify(
 		vKeys.sign,
@@ -61,7 +61,7 @@ export async function verifyMessage(
 		message.proof
 	)
 	if (verified) {
-		console.log("message proof is good.")
+		console.log("message proof is valid!")
 	} else {
 		console.error("invalid message proof!")
 	}

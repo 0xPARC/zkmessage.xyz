@@ -50,25 +50,25 @@ export const SelectGroup: React.FC<SelectGroupProps> = (props) => {
 	const [searchValue, setSearchValue] = useState("")
 	const [loading, setLoading] = useState(false)
 
-	const loadOptions = useDebouncedCallback<
-		(inputValue: string) => Promise<User[]>
-	>(async (inputValue: string) => {
-		setLoading(true)
-		const res = await fetch(
-			`/api/search/users?twitterHandle=${encodeURIComponent(inputValue)}`,
-			{ method: "POST" }
-		)
-
-		if (res.status === 200) {
-			const { users } = await res.json()
-			console.log("got users", users)
-			setLoading(false)
-			return users
-		} else {
-			setLoading(false)
-			return []
-		}
-	}, 500)
+	const loadOptions = useDebouncedCallback(
+		(inputValue: string, callback: (group: User[]) => void) => {
+			setLoading(true)
+			fetch(
+				`/api/search/users?twitterHandle=${encodeURIComponent(inputValue)}`,
+				{ method: "POST" }
+			).then(async (res) => {
+				if (res.status === 200) {
+					const { users } = await res.json()
+					setLoading(false)
+					callback(users)
+				} else {
+					setLoading(false)
+					callback([])
+				}
+			})
+		},
+		200
+	)
 
 	const isClearable = useMemo(
 		() => props.group.some((user) => user.publicKey !== user?.publicKey),
