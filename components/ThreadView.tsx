@@ -29,7 +29,7 @@ export function ThreadView(props: ThreadViewProps) {
 	}, [])
 
 	return (
-		<div className="my-4 px-4 pt-4 pb-2 bg-white rounded-lg">
+		<div className="px-4 pt-4 pb-2 bg-white rounded-lg">
 			<div>{props.thread.firstMessage.body}</div>
 			<div className="flex gap-1 items-center my-2">
 				<div className="flex gap-1 flex-1">

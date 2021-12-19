@@ -21,8 +21,14 @@ import { CreateThread } from "components/CreateThread"
 import { ThreadView } from "components/ThreadView"
 import { getVKeys } from "utils/server/vkeys"
 import { About } from "components/About"
+import { Directory } from "components/Directory"
+import { number } from "fp-ts"
+import { PageNav } from "components/PageNav"
 
 interface IndexPageProps extends PageProps {
+	currentPage: number
+	threadCount: number
+	userCount: number
 	defaultUsers: User[]
 	vKeys: VKeys
 	threads: (Thread & {
@@ -32,19 +38,29 @@ interface IndexPageProps extends PageProps {
 	})[]
 }
 
+const threadPageSize = 20
+const defaultUserLimit = 20
+
 export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 	async (ctx) => {
 		const { publicKey } = nookies.get(ctx)
 
 		const defaultUsers = await prisma.user.findMany({
+			// afaikt this should work but doesn't...
 			// orderBy: { threads: { _count: "desc" } },
 			select: userProps,
-			take: 20,
+			take: defaultUserLimit,
 		})
 
+		const userCount = await prisma.user.count()
+
+		const page =
+			typeof ctx.query.page === "string" ? parseInt(ctx.query.page) : NaN
+
 		const threads = await prisma.thread.findMany({
-			take: 20,
-			orderBy: { createdAt: "desc" },
+			take: threadPageSize,
+			skip: isNaN(page) ? 0 : (page - 1) * threadPageSize,
+			orderBy: { updatedAt: "desc" },
 			where: { firstMessageId: { not: null } },
 			select: {
 				...threadProps,
@@ -55,6 +71,8 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 				},
 			},
 		})
+
+		const threadCount = await prisma.thread.count()
 
 		const serializedThreads = threads.map(
 			({ createdAt, updatedAt, firstMessage, _count, ...thread }) => ({
@@ -73,9 +91,18 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 		)
 
 		const vKeys = getVKeys()
+		const currentPage = isNaN(page) ? 1 : page
 		if (publicKey === undefined) {
 			return {
-				props: { vKeys, user: null, threads: serializedThreads, defaultUsers },
+				props: {
+					vKeys,
+					user: null,
+					threads: serializedThreads,
+					defaultUsers,
+					userCount,
+					currentPage,
+					threadCount,
+				},
 			}
 		} else {
 			const user = await prisma.user.findUnique({
@@ -88,24 +115,35 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 			}
 
 			return {
-				props: { vKeys, user, threads: serializedThreads, defaultUsers },
+				props: {
+					vKeys,
+					user,
+					threads: serializedThreads,
+					defaultUsers,
+					userCount,
+					currentPage,
+					threadCount,
+				},
 			}
 		}
 	}
 
 export default function IndexPage(props: IndexPageProps) {
+	const lastPage = Math.ceil(props.threadCount / threadPageSize)
 	return (
 		<div className="max-w-4xl m-auto px-4 font-mono">
 			<Header />
 			<div className="grid grid-cols-4 gap-6 pt-2 pb-14">
-				<div className="col-span-3">
+				<div className="col-span-3 flex flex-col gap-4">
 					<CreateThread defaultUsers={props.defaultUsers} />
 					{props.threads.map((thread) => (
 						<ThreadView key={thread.id} vKeys={props.vKeys} thread={thread} />
 					))}
+					<PageNav currentPage={props.currentPage} lastPage={lastPage} />
 				</div>
-				<div className="col-span-1">
+				<div className="col-span-1 flex flex-col gap-2">
 					<About />
+					<Directory users={props.defaultUsers} userCount={props.userCount} />
 				</div>
 			</div>
 		</div>

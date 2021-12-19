@@ -22,6 +22,7 @@ import { UserIcon } from "components/UserIcon"
 
 import { CreateMessage } from "components/CreateMessage"
 import { PageContext } from "utils/context"
+import { PageNav } from "components/PageNav"
 
 type ThreadPageParams = { id: string }
 
@@ -30,7 +31,11 @@ interface ThreadPageProps extends PageProps {
 	thread: Thread
 	group: User[]
 	messages: Message[]
+	currentPage: number
+	messageCount: number
 }
+
+const messagePageSize = 20
 
 export const getServerSideProps: GetServerSideProps<
 	ThreadPageProps,
@@ -42,12 +47,23 @@ export const getServerSideProps: GetServerSideProps<
 
 	const { publicKey } = nookies.get(ctx, "publicKey")
 
+	const page =
+		typeof ctx.query.page === "string" ? parseInt(ctx.query.page) : NaN
+
 	const thread = await prisma.thread.findUnique({
 		where: { id: ctx.params.id },
 		select: {
 			...threadProps,
 			group: { select: userProps },
-			messages: { select: messageProps },
+			messages: {
+				take: messagePageSize,
+				skip: isNaN(page) ? 0 : (page - 1) * messagePageSize,
+				orderBy: { createdAt: "desc" },
+				select: messageProps,
+			},
+			_count: {
+				select: { messages: true },
+			},
 		},
 	})
 
@@ -56,6 +72,7 @@ export const getServerSideProps: GetServerSideProps<
 	}
 
 	const { id, createdAt, updatedAt, group, messages } = thread
+	const messageCount = thread._count.messages
 
 	const serializedThread = {
 		id,
@@ -73,6 +90,7 @@ export const getServerSideProps: GetServerSideProps<
 	)
 
 	const vKeys = getVKeys()
+	const currentPage = isNaN(page) ? 1 : page
 	if (publicKey === undefined) {
 		return {
 			props: {
@@ -81,6 +99,8 @@ export const getServerSideProps: GetServerSideProps<
 				thread: serializedThread,
 				group,
 				messages: serializedMessages,
+				currentPage,
+				messageCount,
 			},
 		}
 	} else {
@@ -100,6 +120,8 @@ export const getServerSideProps: GetServerSideProps<
 				thread: serializedThread,
 				group,
 				messages: serializedMessages,
+				currentPage,
+				messageCount,
 			},
 		}
 	}
@@ -114,21 +136,13 @@ export default function ThreadPage(props: ThreadPageProps) {
 		[user]
 	)
 
+	const lastPage = Math.ceil(props.messageCount / messagePageSize)
+
 	return (
 		<div className="max-w-4xl m-auto px-4 font-mono">
 			<Header />
 			<div className="grid grid-cols-4 gap-6 pt-2 pb-14">
-				<div className="col-span-3">
-					<div className="bg-white rounded-lg flex gap-x-2">
-						{props.group.map((user) => (
-							<div
-								key={user.publicKey}
-								className="bg-gray-200 rounded flex items-center gap-x-2 text-sm py-1 px-2 m-2"
-							>
-								<UserIcon user={user} /> {user.twitterHandle}
-							</div>
-						))}
-					</div>
+				<div className="col-span-3 flex flex-col gap-4">
 					{props.messages.map((message) => (
 						<MessageView
 							key={message.id}
@@ -137,12 +151,35 @@ export default function ThreadPage(props: ThreadPageProps) {
 							message={message}
 						/>
 					))}
-					{userInGroup && (
+					{userInGroup && props.currentPage === lastPage && (
 						<CreateMessage thread={props.thread} group={props.group} />
 					)}
+					<PageNav currentPage={props.currentPage} lastPage={lastPage} />
 				</div>
 				<div className="col-span-1">
-					<About />
+					<div className="p-4 bg-white rounded-lg">
+						<div className="mb-4">in this thread</div>
+						{props.group.map((user) => (
+							<div key={user.publicKey} className="flex items-center gap-x-2">
+								<UserIcon user={user} />
+								<a
+									className="mt-0.5 hover:underline flex-1"
+									href={`https://twitter.com/${user.twitterHandle}`}
+								>
+									{user.twitterHandle}
+								</a>
+								<a
+									href={`https://twitter.com/${user.twitterHandle}/status/${user.verificationTweetId}`}
+								>
+									<img
+										width={16}
+										src="/key.svg"
+										className="inline-block opacity-20 hover:opacity-70"
+									/>
+								</a>
+							</div>
+						))}
+					</div>
 				</div>
 			</div>
 		</div>

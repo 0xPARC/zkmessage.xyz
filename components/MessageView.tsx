@@ -20,7 +20,7 @@ export function MessageView(props: MessageViewProps) {
 	}, [])
 
 	return (
-		<div className="my-4 px-4 pt-4 pb-2 bg-white rounded-lg">
+		<div className="px-4 pt-4 pb-2 bg-white rounded-lg">
 			<div>{props.message.body}</div>
 			<div className="mt-2 flex gap-1 items-baseline">
 				<div className="flex-1 text-sm text-gray-400 ">
