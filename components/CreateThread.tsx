@@ -7,8 +7,13 @@ import { SelectGroup } from "./SelectGroup"
 import { hashMessage } from "utils/mimc"
 import { PageContext } from "utils/context"
 import { sign } from "utils/client/prove"
+import { User } from "utils/types"
 
-export const CreateThread: React.FC<{}> = (props) => {
+interface CreateThreadProps {
+	defaultUsers: User[]
+}
+
+export const CreateThread: React.FC<CreateThreadProps> = (props) => {
 	const { user, secretKey } = useContext(PageContext)
 
 	const [value, setValue] = useState("")
@@ -72,7 +77,11 @@ export const CreateThread: React.FC<{}> = (props) => {
 			/>
 			<div className="flex my-2 gap-2">
 				<div className="flex-1">
-					<SelectGroup group={group} setGroup={setGroup} />
+					<SelectGroup
+						group={group}
+						setGroup={setGroup}
+						defaultUsers={props.defaultUsers}
+					/>
 				</div>
 				<input
 					className={

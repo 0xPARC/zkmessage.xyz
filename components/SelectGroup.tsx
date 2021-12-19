@@ -18,6 +18,7 @@ const getOptionValue = (user: User) => user.publicKey
 
 interface SelectGroupProps {
 	group: User[]
+	defaultUsers: User[]
 	setGroup: (group: User[]) => void
 }
 
@@ -102,7 +103,7 @@ export const SelectGroup: React.FC<SelectGroupProps> = (props) => {
 			styles={styles}
 			value={props.group}
 			isClearable={isClearable}
-			defaultOptions={[]}
+			defaultOptions={props.defaultUsers}
 			inputValue={searchValue}
 			onInputChange={setSearchValue}
 			loadOptions={loadOptions}

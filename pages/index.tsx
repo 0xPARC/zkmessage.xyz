@@ -23,6 +23,7 @@ import { getVKeys } from "utils/server/vkeys"
 import { About } from "components/About"
 
 interface IndexPageProps extends PageProps {
+	defaultUsers: User[]
 	vKeys: VKeys
 	threads: (Thread & {
 		firstMessage: Message
@@ -35,7 +36,14 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 	async (ctx) => {
 		const { publicKey } = nookies.get(ctx)
 
+		const defaultUsers = await prisma.user.findMany({
+			// orderBy: { threads: { _count: "desc" } },
+			select: userProps,
+			take: 20,
+		})
+
 		const threads = await prisma.thread.findMany({
+			take: 20,
 			orderBy: { createdAt: "desc" },
 			where: { firstMessageId: { not: null } },
 			select: {
@@ -67,7 +75,7 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 		const vKeys = getVKeys()
 		if (publicKey === undefined) {
 			return {
-				props: { vKeys, user: null, threads: serializedThreads },
+				props: { vKeys, user: null, threads: serializedThreads, defaultUsers },
 			}
 		} else {
 			const user = await prisma.user.findUnique({
@@ -79,19 +87,21 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 				nookies.destroy(ctx, "publicKey")
 			}
 
-			return { props: { vKeys, user, threads: serializedThreads } }
+			return {
+				props: { vKeys, user, threads: serializedThreads, defaultUsers },
+			}
 		}
 	}
 
-export default function IndexPage({ threads, vKeys }: IndexPageProps) {
+export default function IndexPage(props: IndexPageProps) {
 	return (
 		<div className="max-w-4xl m-auto px-4 font-mono">
 			<Header />
 			<div className="grid grid-cols-4 gap-6 pt-2 pb-14">
 				<div className="col-span-3">
-					<CreateThread />
-					{threads.map((thread) => (
-						<ThreadView key={thread.id} vKeys={vKeys} thread={thread} />
+					<CreateThread defaultUsers={props.defaultUsers} />
+					{props.threads.map((thread) => (
+						<ThreadView key={thread.id} vKeys={props.vKeys} thread={thread} />
 					))}
 				</div>
 				<div className="col-span-1">

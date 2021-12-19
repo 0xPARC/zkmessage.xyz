@@ -14,7 +14,10 @@ import nookies from "nookies"
 import type { PageProps } from "utils/types"
 
 import { prisma } from "utils/server/prisma"
-import { LOCAL_STORAGE_SECRET_KEY_UNVERIFIED } from "utils/client/localStorage"
+import {
+	LOCAL_STORAGE_SECRET_KEY,
+	LOCAL_STORAGE_SECRET_KEY_UNVERIFIED,
+} from "utils/client/localStorage"
 
 import { Buffer } from "buffer"
 import { derivePublicKey } from "utils/mimc"
@@ -51,16 +54,20 @@ const accountNotFoundError = "account_not_found"
 
 export default function LoginPage(props: LoginPageProps) {
 	// this is really ugly and i'm sorry.
-	const { loading, setUser } = useContext(PageContext)
 	const loaded = useRef(false)
+	const {
+		loading,
+		secretKey,
+		unverifiedSecretKey,
+		setUser,
+		setSecretKey,
+		setUnverifiedSecretKey,
+	} = useContext(PageContext)
 
 	const [value, setValue] = useState("")
 	const valid = useMemo(() => hexPattern.test(value), [value])
 
 	const router = useRouter()
-
-	const { secretKey, unverifiedSecretKey, setUnverifiedSecretKey } =
-		useContext(PageContext)
 
 	useEffect(() => {
 		if (!loading && !loaded.current) {
@@ -97,6 +104,8 @@ export default function LoginPage(props: LoginPageProps) {
 
 			if (res.status === 200) {
 				const { user } = await res.json()
+				localStorage.setItem(LOCAL_STORAGE_SECRET_KEY, value)
+				setSecretKey(value)
 				setUser(user)
 				router.push("/")
 				// window.location.href = "/"

@@ -3,6 +3,7 @@ import { hexPattern } from "utils/hexPattern"
 
 import nookies from "nookies"
 import { userProps } from "utils/types"
+import { prisma } from "utils/server/prisma"
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
 	if (req.method !== "POST") {
