@@ -1,11 +1,23 @@
 import { createContext } from "react"
 
-import type { VKeys } from "utils/types"
+import type { User } from "utils/types"
 
-interface AppContextValue {
-	vkeys: VKeys
+interface PageContext {
+	user: null | User
+	secretKey: null | string
+	unverifiedSecretKey: null | string
+	setUser: (user: null | User) => void
+	setSecretKey: (secretKey: null | string) => void
+	setUnverifiedSecretKey: (unverifiedSecretKey: null | string) => void
+	loading: boolean
 }
 
-export const AppContext = createContext<AppContextValue>({
-	vkeys: { sign: null, reveal: null, deny: null },
+export const PageContext = createContext<PageContext>({
+	user: null,
+	secretKey: null,
+	unverifiedSecretKey: null,
+	setUser: (user) => {},
+	setSecretKey: (secretKey) => {},
+	setUnverifiedSecretKey: (unverifiedSecretKey) => {},
+	loading: true,
 })
