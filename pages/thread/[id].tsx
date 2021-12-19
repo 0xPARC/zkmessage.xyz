@@ -1,5 +1,5 @@
 import type { GetServerSideProps } from "next"
-import React, { useContext } from "react"
+import React, { useContext, useMemo } from "react"
 
 import nookies from "nookies"
 
@@ -21,6 +21,7 @@ import { MessageView } from "components/MessageView"
 import { UserIcon } from "components/UserIcon"
 
 import { CreateMessage } from "components/CreateMessage"
+import { PageContext } from "utils/context"
 
 type ThreadPageParams = { id: string }
 
@@ -105,6 +106,14 @@ export const getServerSideProps: GetServerSideProps<
 }
 
 export default function ThreadPage(props: ThreadPageProps) {
+	const { user } = useContext(PageContext)
+	const userInGroup = useMemo(
+		() =>
+			user !== null &&
+			props.group.some(({ publicKey }) => user.publicKey === publicKey),
+		[user]
+	)
+
 	return (
 		<div className="max-w-4xl m-auto px-4 font-mono">
 			<Header />
@@ -128,7 +137,9 @@ export default function ThreadPage(props: ThreadPageProps) {
 							message={message}
 						/>
 					))}
-					<CreateMessage thread={props.thread} group={props.group} />
+					{userInGroup && (
+						<CreateMessage thread={props.thread} group={props.group} />
+					)}
 				</div>
 				<div className="col-span-1">
 					<About />
