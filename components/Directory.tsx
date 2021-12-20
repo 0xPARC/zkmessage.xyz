@@ -12,16 +12,17 @@ export const Directory: React.FC<DirectoryProps> = (props) => {
 	return (
 		<div className="p-4 bg-white rounded-lg flex flex-col gap-2">
 			{props.users.map((user) => (
-				<div key={user.publicKey} className="flex gap-2 items-center">
+				<div key={user.publicKey} className="flex gap-2 items-center w-full">
 					<UserIcon user={user} />
 					<a
-						className="mt-0.5 hover:underline flex-1"
+						className="mt-0.5 hover:underline flex-1 overflow-hidden overflow-ellipsis"
 						href={`https://twitter.com/${user.twitterHandle}`}
 					>
 						{user.twitterHandle}
 					</a>
 					<a
 						href={`https://twitter.com/${user.twitterHandle}/status/${user.verificationTweetId}`}
+						className="flex-none"
 					>
 						<img
 							width={16}
