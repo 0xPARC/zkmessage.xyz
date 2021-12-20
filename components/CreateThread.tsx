@@ -85,13 +85,13 @@ export const CreateThread: React.FC<CreateThreadProps> = (props) => {
 				</div>
 				<input
 					className={
-						user
+						user && value
 							? "text-white rounded-lg px-4 pt-2 pb-1 cursor-pointer bg-pink hover:bg-midpink"
 							: "text-white rounded-lg px-4 pt-2 pb-1 bg-gray-200"
 					}
 					type="button"
 					value="Post"
-					disabled={user === null}
+					disabled={user === null || value === ""}
 					onClick={handleSubmit}
 				/>
 			</div>
