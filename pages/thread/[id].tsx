@@ -58,7 +58,7 @@ export const getServerSideProps: GetServerSideProps<
 			messages: {
 				take: messagePageSize,
 				skip: isNaN(page) ? 0 : (page - 1) * messagePageSize,
-				orderBy: { createdAt: "desc" },
+				orderBy: { createdAt: "asc" },
 				select: messageProps,
 			},
 			_count: {
