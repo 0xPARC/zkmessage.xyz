@@ -21,9 +21,8 @@ import { CreateThread } from "components/CreateThread"
 import { ThreadView } from "components/ThreadView"
 import { getVKeys } from "utils/server/vkeys"
 import { About } from "components/About"
-import { Directory } from "components/Directory"
-import { number } from "fp-ts"
 import { PageNav } from "components/PageNav"
+import { UserList } from "components/UserList"
 
 interface IndexPageProps extends PageProps {
 	currentPage: number
@@ -130,6 +129,7 @@ export const getServerSideProps: GetServerSideProps<IndexPageProps, {}> =
 
 export default function IndexPage(props: IndexPageProps) {
 	const lastPage = Math.ceil(props.threadCount / threadPageSize)
+
 	return (
 		<div className="max-w-4xl m-auto px-4 font-mono">
 			<Header />
@@ -143,7 +143,12 @@ export default function IndexPage(props: IndexPageProps) {
 				</div>
 				<div className="col-span-1 flex flex-col gap-2">
 					<About />
-					<Directory users={props.defaultUsers} userCount={props.userCount} />
+					<div className="p-4 bg-white rounded-lg flex flex-col gap-4">
+						<UserList users={props.defaultUsers} />
+						<a href="/users" className="hover:underline self-end">
+							all users
+						</a>
+					</div>
 				</div>
 			</div>
 		</div>
