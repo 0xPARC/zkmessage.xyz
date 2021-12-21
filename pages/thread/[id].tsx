@@ -23,6 +23,7 @@ import { UserIcon } from "components/UserIcon"
 import { CreateMessage } from "components/CreateMessage"
 import { PageContext } from "utils/context"
 import { PageNav } from "components/PageNav"
+import { UserList } from "components/UserList"
 
 type ThreadPageParams = { id: string }
 
@@ -159,26 +160,7 @@ export default function ThreadPage(props: ThreadPageProps) {
 				<div className="col-span-1">
 					<div className="p-4 bg-white rounded-lg">
 						<div className="mb-4">in this thread</div>
-						{props.group.map((user) => (
-							<div key={user.publicKey} className="flex items-center gap-x-2">
-								<UserIcon user={user} />
-								<a
-									className="mt-0.5 hover:underline flex-1"
-									href={`https://twitter.com/${user.twitterHandle}`}
-								>
-									{user.twitterHandle}
-								</a>
-								<a
-									href={`https://twitter.com/${user.twitterHandle}/status/${user.verificationTweetId}`}
-								>
-									<img
-										width={16}
-										src="/key.svg"
-										className="inline-block opacity-20 hover:opacity-70"
-									/>
-								</a>
-							</div>
-						))}
+						<UserList users={props.group} />
 					</div>
 				</div>
 			</div>

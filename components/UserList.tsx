@@ -2,15 +2,13 @@ import React from "react"
 import { User } from "utils/types"
 import { UserIcon } from "./UserIcon"
 
-interface DirectoryProps {
+interface UserListProps {
 	users: User[]
-	userCount: number
 }
 
-export const Directory: React.FC<DirectoryProps> = (props) => {
-	const rest = props.userCount - props.users.length
+export const UserList: React.FC<UserListProps> = (props) => {
 	return (
-		<div className="p-4 bg-white rounded-lg flex flex-col gap-2">
+		<div className="flex flex-col gap-2">
 			{props.users.map((user) => (
 				<div key={user.publicKey} className="flex gap-2 items-center w-full">
 					<UserIcon user={user} />
@@ -32,11 +30,6 @@ export const Directory: React.FC<DirectoryProps> = (props) => {
 					</a>
 				</div>
 			))}
-			{rest > 0 && (
-				<a href="/users" className="hover:underline self-end">
-					... all users
-				</a>
-			)}
 		</div>
 	)
 }
