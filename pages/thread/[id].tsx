@@ -4,6 +4,8 @@ import React, { useContext, useMemo } from "react"
 import nookies from "nookies"
 
 import { prisma } from "utils/server/prisma"
+import { getVKeys } from "utils/server/vkeys"
+import { PageContext } from "utils/context"
 import {
 	Message,
 	messageProps,
@@ -14,14 +16,10 @@ import {
 	userProps,
 	VKeys,
 } from "utils/types"
-import { getVKeys } from "utils/server/vkeys"
-import { Header } from "components/Header"
-import { About } from "components/About"
-import { MessageView } from "components/MessageView"
-import { UserIcon } from "components/UserIcon"
 
+import { Header } from "components/Header"
+import { MessageView } from "components/MessageView"
 import { CreateMessage } from "components/CreateMessage"
-import { PageContext } from "utils/context"
 import { PageNav } from "components/PageNav"
 import { UserList } from "components/UserList"
 
@@ -152,7 +150,7 @@ export default function ThreadPage(props: ThreadPageProps) {
 							message={message}
 						/>
 					))}
-					{userInGroup && props.currentPage === lastPage && (
+					{props.currentPage === lastPage && (
 						<CreateMessage thread={props.thread} group={props.group} />
 					)}
 					<PageNav currentPage={props.currentPage} lastPage={lastPage} />

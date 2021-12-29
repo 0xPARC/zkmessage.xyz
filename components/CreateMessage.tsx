@@ -53,7 +53,9 @@ export function CreateMessage(props: CreateMessageProps) {
 				disabled={!isUserInGroup}
 				type="text"
 				placeholder={
-					isUserInGroup ? "Type your reply here" : "Login to send messages"
+					isUserInGroup
+						? "Reply"
+						: "You must be logged in as a group member to reply"
 				}
 				value={value}
 				onChange={(event) => setValue(event.target.value)}
