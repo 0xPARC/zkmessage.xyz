@@ -40,9 +40,12 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 	}
 
 	const { publicKey } = req.query
+	console.log("creating user with public key", publicKey)
 	if (typeof publicKey !== "string" || !hexPattern.test(publicKey)) {
 		return res.status(400).end()
 	}
+
+	console.log("looking for verification tweet...")
 
 	const query = encodeURIComponent(`@${zkChatTwitterHandle} "${publicKey}"`)
 	const twitterApiResponse = await fetch(
@@ -54,29 +57,32 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 		}
 	)
 
+	console.log("got twitter api response with status", twitterApiResponse.status)
+
 	if (twitterApiResponse.status !== 200) {
 		return res.status(500).end()
 	}
 
 	const data = await twitterApiResponse.json()
+
 	if (!twitterSearchResult.is(data) || data.meta.result_count < 1) {
+		console.error("couldn't find verification tweet", data)
 		return res.status(500).end()
 	}
 
-	const [{ id, author_id }] = data.data
+	const [{ id: verificationTweetId, author_id: twitterId }] = data.data
 
-	const { username, profile_image_url } = data.includes.users.find(
-		(user) => user.id === author_id
-	)!
+	const { username: twitterHandle, profile_image_url: twitterProfileImage } =
+		data.includes.users.find((user) => user.id === twitterId)!
 
 	await prisma.user
 		.create({
 			data: {
 				publicKey,
-				twitterId: author_id,
-				twitterHandle: username,
-				verificationTweetId: id,
-				twitterProfileImage: profile_image_url,
+				twitterId,
+				twitterHandle,
+				verificationTweetId,
+				twitterProfileImage,
 			},
 			select: userProps,
 		})
