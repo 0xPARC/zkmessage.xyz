@@ -71,7 +71,7 @@ export const CreateThread: React.FC<CreateThreadProps> = (props) => {
 				}
 				disabled={user === null}
 				type="text"
-				placeholder={user ? "Type your message here" : "Login to send messages"}
+				placeholder={user ? "Type your message here" : "Login to post messages"}
 				value={value}
 				onChange={(event) => setValue(event.target.value)}
 			/>
@@ -91,7 +91,7 @@ export const CreateThread: React.FC<CreateThreadProps> = (props) => {
 					}
 					type="button"
 					value="Post"
-					disabled={user === null || value === ""}
+					disabled={user === null || value === "" || group.length < 2}
 					onClick={handleSubmit}
 				/>
 			</div>
