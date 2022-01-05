@@ -12,25 +12,27 @@ import { PageContext } from "utils/context"
 
 interface BackupPageProps extends PageProps {}
 
-export const getServerSideProps: GetServerSideProps<BackupPageProps, {}> =
-	async (ctx) => {
-		const { publicKey } = nookies.get(ctx)
+export const getServerSideProps: GetServerSideProps<
+	BackupPageProps,
+	{}
+> = async (ctx) => {
+	const { publicKey } = nookies.get(ctx)
 
-		if (publicKey !== undefined) {
-			const user = await prisma.user.findUnique({
-				where: { publicKey },
-				select: { publicKey: true },
-			})
+	if (publicKey !== undefined) {
+		const user = await prisma.user.findUnique({
+			where: { publicKey },
+			select: { publicKey: true },
+		})
 
-			if (user === null) {
-				nookies.destroy(ctx, "publicKey", { path: "/", httpOnly: true })
-			} else {
-				return { redirect: { destination: "/", permanent: false } }
-			}
+		if (user === null) {
+			nookies.destroy(ctx, "publicKey", { path: "/", httpOnly: true })
+		} else {
+			return { redirect: { destination: "/", permanent: false } }
 		}
-
-		return { props: { user: null } }
 	}
+
+	return { props: { user: null } }
+}
 
 export default function BackupPage(props: BackupPageProps) {
 	const router = useRouter()
@@ -68,9 +70,11 @@ export default function BackupPage(props: BackupPageProps) {
 					value={copied ? "Copied!" : "Copy"}
 					onClick={handleCopy}
 				/>
-				<div className="cursor-pointer bg-pink hover:bg-midpink text-white text-center rounded-xl px-4 py-2">
-					<Link href="/connect">Next</Link>
-				</div>
+				<Link href="/connect">
+					<a className="block cursor-pointer bg-pink hover:bg-midpink text-white text-center rounded-xl px-4 py-2">
+						Next
+					</a>
+				</Link>
 			</div>
 		</div>
 	)
