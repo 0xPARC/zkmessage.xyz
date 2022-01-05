@@ -1,29 +1,11 @@
-# zk-group-sigs-server
+# zkmessage.xyz
 
 ```
 npm i
-cp node_modules/snarkjs/build/snarkjs.min.js public/.
 npm run dev
 ```
 
-You also want to add two (sorry) env files both containing
+You also need to create two (sorry) env files:
 
-```
-DATABASE_URL="file:/path/to/repo/database.sqlite"
-```
-
-in `.env.local` AND `prisma/.env`.
-
-Lastly initialize an empty database with
-
-```
-npx prisma generate
-npx prisma db push
-```
-
-Whenever the prisma schema changes you need to re-generate the database stuff with
-
-```
-npx prisma generate
-npx prisma db push
-```
+- `.env.local` with `DATABASE_URL` and `TWITTER_BEARER_TOKEN` variables
+- `prisma/.env` with the same `DATABASE_URL` variable again
