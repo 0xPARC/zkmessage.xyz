@@ -1,6 +1,6 @@
 {
 	"private": true,
-	"name": "zk-group-sigs-server",
+	"name": "zkmessage.xyz",
 	"version": "0.0.0",
 	"main": "index.js",
 	"scripts": {
@@ -12,13 +12,13 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/joeltg/zk-group-sigs-server.git"
+		"url": "git+https://github.com/joeltg/zkmessage.xyz.git"
 	},
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/joeltg/zk-group-sigs-server/issues"
+		"url": "https://github.com/joeltg/zkmessage.xyz/issues"
 	},
-	"homepage": "https://github.com/joeltg/zk-group-sigs-server#readme",
+	"homepage": "https://github.com/joeltg/zkmessage.xyz#readme",
 	"dependencies": {
 		"@prisma/client": "^3.5.0",
 		"buffer": "^6.0.3",
