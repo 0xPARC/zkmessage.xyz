@@ -6,7 +6,7 @@
 	"scripts": {
 		"start": "next start -p $PORT",
 		"export": "next export",
-		"build": "next build",
+		"build": "prisma generate && next build",
 		"dev": "next dev",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
