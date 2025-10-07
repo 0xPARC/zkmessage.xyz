@@ -48,7 +48,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 			res.setHeader("Location", `/thread/${id}`)
 			res.status(200).end()
 		})
-		.catch((err) => {
+		.catch((err: any) => {
 			console.error(err)
 			res.status(500).end()
 		})

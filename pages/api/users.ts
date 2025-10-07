@@ -22,7 +22,7 @@ const twitterSearchResult = t.type({
 				name: t.string,
 				username: t.string,
 				profile_image_url: t.string,
-			})
+			}),
 		),
 	}),
 	data: t.array(
@@ -30,7 +30,7 @@ const twitterSearchResult = t.type({
 			author_id: t.string,
 			id: t.string,
 			text: t.string,
-		})
+		}),
 	),
 })
 
@@ -54,7 +54,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 			headers: {
 				Authorization: `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
 			},
-		}
+		},
 	)
 
 	console.log("got twitter api response with status", twitterApiResponse.status)
@@ -94,7 +94,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 			})
 			res.status(200).json(user)
 		})
-		.catch((err) => {
+		.catch((err: any) => {
 			console.error(err)
 			res.status(500).end()
 		})
